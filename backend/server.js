@@ -15,7 +15,29 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:5173',
+"https:/localhost:5000",
+"https://majestic-rose-backend.vercel.app/"
+
+  ];
+  
+  const corsOptions = {
+    origin: function (origin, callback) {
+      // Allow non-browser tools like Postman
+      if (!origin) return callback(null, true);
+  
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error(' CORS blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true, // if using cookies or Authorization headers
+  };
+  
+  app.use(cors(corsOptions));
 app.use(express.json());
 
 // Debug: Check environment variables
