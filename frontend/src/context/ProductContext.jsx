@@ -9,6 +9,7 @@ export const ProductProvider = ({ children }) => {
   const backendurl = import.meta.env.VITE_backendurl;
 
   const [products, setProducts] = useState([]);
+  console.log(products);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
