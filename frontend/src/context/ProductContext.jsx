@@ -2,11 +2,13 @@
 import React, { createContext, useState, useEffect } from 'react';
 
 // Create and export the context
-export const ProductContext = createContext();
+const ProductContext = createContext();
+export { ProductContext };
 
 // Create and export the provider
 export const ProductProvider = ({ children }) => {
   const backendurl = import.meta.env.VITE_backendurl;
+  console.log('Backend URL:', backendurl);
 
   const [products, setProducts] = useState([]);
   console.log(products);
