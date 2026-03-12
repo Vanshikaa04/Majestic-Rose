@@ -1,0 +1,63 @@
+# dependencies
+node_modules/
+
+# environment variables
+.env
+.env.*
+!.env.example
+
+# logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# build folders
+dist/
+build/
+.next/
+out/
+
+# coverage
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# cache
+.cache/
+.parcel-cache/
+
+# optional npm cache
+.npm/
+
+# dotenv local configs
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# misc
+*.pid
+*.seed
+*.pid.lock
+
+# uploads (if backend stores files locally)
+uploads/
+
+
+
+# virtual environment
+venv/
+.env/
+
+# mac
+.DS_Store
