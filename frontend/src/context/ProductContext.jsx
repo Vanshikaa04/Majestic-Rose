@@ -6,6 +6,8 @@ export const ProductContext = createContext();
 
 // Create and export the provider
 export const ProductProvider = ({ children }) => {
+  const backendurl = import.meta.env.VITE_backendurl;
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,7 +16,7 @@ export const ProductProvider = ({ children }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5000/api/products');
+      const response = await fetch(backendurl+'/api/products');
       
       if (!response.ok) {
         throw new Error('Failed to fetch products');
@@ -35,7 +37,7 @@ export const ProductProvider = ({ children }) => {
   const fetchProductsByCategory = async (category) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/products/category/${category}`);
+      const response = await fetch(`${backendurl}/api/products/category/${category}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch products');
@@ -55,7 +57,7 @@ export const ProductProvider = ({ children }) => {
   // Get single product by ID
   const getProductById = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}`);
+      const response = await fetch(`${backendurl}/api/products/${id}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch product');
@@ -83,7 +85,8 @@ export const ProductProvider = ({ children }) => {
     fetchProducts,
     fetchProductsByCategory,
     getProductById,
-    setProducts
+    setProducts,
+    backendurl
   };
 
   return (

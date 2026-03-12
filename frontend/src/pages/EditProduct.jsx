@@ -1,10 +1,12 @@
 // pages/EditProduct.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Camera, Video, X, Upload, Loader, Star, ChevronLeft } from 'lucide-react';
+import { ProductContext } from '../context/ProductContext';
 
 const EditProduct = () => {
+  const {backendurl}= useContext(ProductContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ const EditProduct = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}`);
+      const response = await fetch(`${backendurl}/api/products/${id}`);
       const data = await response.json();
       setFormData(data);
       setLoading(false);
@@ -63,7 +65,7 @@ const EditProduct = () => {
     });
     
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch(`${backendurl}/api/upload`, {
         method: 'POST',
         body: formData
       });
@@ -94,7 +96,7 @@ const EditProduct = () => {
     
     // Delete from Cloudinary
     try {
-      await fetch('http://localhost:5000/api/delete-media', {
+      await fetch(`${backendurl}/api/delete-media`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -142,7 +144,7 @@ const EditProduct = () => {
     }
     
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
+      const response = await fetch(`${backendurl}/api/products/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

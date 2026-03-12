@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Loader } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext'; // Import from context
+import { ProductContext } from '../context/ProductContext';
 
 const Login = () => {
+  const {backendurl}= useContext(ProductContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/admin/login', {
+      const response = await fetch(`${backendurl}/api/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

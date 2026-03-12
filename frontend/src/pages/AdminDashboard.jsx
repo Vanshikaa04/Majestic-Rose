@@ -30,6 +30,7 @@ const AdminDashboard = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const {backendurl} = useContext(ProductContext)
 
   const stockStatusStyles = {
     instock: 'bg-green-100 text-green-800',
@@ -94,7 +95,7 @@ const AdminDashboard = () => {
     setIsDeleting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+      const response = await fetch(`${backendurl}/api/products/${productId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -175,7 +176,7 @@ const handleSaveEdit = async (e) => {
 
     console.log('Sending update data:', updateData);
 
-    const response = await fetch(`http://localhost:5000/api/products/${selectedProduct._id}`, {
+    const response = await fetch(`${backendurl}/api/products/${selectedProduct._id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

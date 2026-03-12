@@ -1,11 +1,13 @@
 // pages/AddProduct.jsx
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Camera, X, Upload, Loader, Star, Image as ImageIcon } from 'lucide-react';
+import { ProductContext } from '../context/ProductContext';
 
 const AddProduct = () => {
   const navigate = useNavigate();
+  const {backendurl}=useContext(ProductContext);
   const [formData, setFormData] = useState({
     name: '',
     category: 'fashion',
@@ -115,7 +117,7 @@ const AddProduct = () => {
         throw new Error('You must be logged in to upload files');
       }
 
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch(backendurl+'/api/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -217,7 +219,7 @@ const handleSubmit = async (e) => {
 
     console.log('Sending product data (stringified):', JSON.stringify(productData, null, 2));
 
-    const response = await fetch('http://localhost:5000/api/products', {
+    const response = await fetch(backendurl+'/api/products', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 // context/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react';
-
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { MainContext } from '../../../../code master tech/frontend/src/context/MainContext';
+import { ProductContext } from './ProductContext';
 // Create and export the context
 export const AuthContext = createContext();
 
@@ -9,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
+  const {backendurl}= useContext(ProductContext);
 
   useEffect(() => {
     checkAuth();
@@ -21,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     if (token && adminData) {
       try {
         // Verify token with backend
-        const response = await fetch('http://localhost:5000/api/admin/verify', {
+        const response = await fetch(backendurl + '/api/admin/verify', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
