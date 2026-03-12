@@ -388,9 +388,9 @@ app.post('/api/delete-media', verifyToken, async (req, res) => {
 });
 
 // Test route to check if server is running
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Server is running!' });
-});
+app.get ('/',(req,res)=>{
+    res.send("API WORKING")
+})
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
