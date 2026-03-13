@@ -98,7 +98,7 @@ const Products = () => {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin text-green-600 mx-auto mb-4" />
+          <Loader className="w-12 h-12 animate-spin mx-auto mb-4" style={{color:"var(--primary-color)"}}/>
           <p className="text-gray-600">Loading products...</p>
         </div>
       </div>
@@ -117,7 +117,7 @@ const Products = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 text-center md:text-left"
         >
-          <h1 className="text-4xl md:text-5xl font-bold capitalize mb-4 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold capitalize mb-4 bg-gradient-to-r  bg-clip-text text-transparent"  style={{color:"var(--primary-color)"}}>
             {category === 'jewellery' ? 'Jewellery Collection' : category}
           </h1>
           <p className="text-gray-600 text-lg">
@@ -205,7 +205,9 @@ const Products = () => {
                           )}
 
                           {/* Category/Subcategory Badge - Adjusted for mobile */}
-                          <div className="absolute top-2 right-2 bg-green-600 text-white px-1.5 py-0.5 rounded text-[10px] md:text-xs font-semibold uppercase tracking-wider">
+                          <div className="absolute top-2 right-2  px-1.5 py-0.5 rounded text-[10px] md:text-xs font-semibold uppercase tracking-wider" 
+                          style={{backgroundColor:"var(--pink)", color:"var(--primary-color)"}}
+                          >
                             {product.category === 'jewellery' ? product.subcategory : product.category === 'stoles-scarves' ? 'Stoles' : product.category}
                           </div>
 
@@ -232,7 +234,10 @@ const Products = () => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => handleWhatsApp(product)}
-                          className="w-full bg-green-500 text-white py-1.5 md:py-2.5 rounded-lg text-[10px] md:text-sm font-semibold flex items-center justify-center space-x-1 md:space-x-2 hover:bg-green-600 transition shadow-md"
+                          className="w-full   py-1.5 md:py-2.5 rounded-lg text-[10px] md:text-sm font-semibold flex items-center justify-center space-x-1 md:space-x-2 hover:bg-green-600 transition shadow-md"
+                          
+                          style={{backgroundColor:"var(--primary-color)", color:"var(--pink)"}}
+                        
                         >
                           <MessageCircle className="w-3 h-3 md:w-5 md:h-5" />
                           <span className="hidden md:inline">Contact on WhatsApp</span>
@@ -286,7 +291,8 @@ const Products = () => {
                       <motion.button
                         whileHover={{ scale: 1.05, x: 5 }}
                         whileTap={{ scale: 0.95 }}
-                        className="flex items-center space-x-1 md:space-x-2 text-green-600 text-sm md:text-base font-semibold hover:text-green-700"
+                        className="flex items-center space-x-1 md:space-x-2  text-sm md:text-base font-semibold hover:text-green-700"
+                         style={{color:"var(--primary-color)"}}
                       >
                         <span>View All</span>
                         <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />

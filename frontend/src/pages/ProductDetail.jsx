@@ -29,9 +29,9 @@ const ProductDetail = () => {
 
   // Define all categories
   const allCategories = [
-    { name: 'fashion', label: 'Fashion', icon: '👗', color: 'from-pink-500 to-rose-500', bgColor: 'bg-pink-50', textColor: 'text-pink-600' },
-    { name: 'jewellery', label: 'Jewellery', icon: '💎', color: 'from-purple-500 to-indigo-500', bgColor: 'bg-purple-50', textColor: 'text-purple-600' },
-    { name: 'stoles-scarves', label: 'Stoles & Scarves', icon: '🧣', color: 'from-amber-500 to-orange-500', bgColor: 'bg-amber-50', textColor: 'text-amber-600' }
+    { name: 'fashion', label: 'Fashion', icon: '👗', color: 'from-pink-500 to-rose-500', bgColor: 'var(--pink)', textColor: 'text-pink-600' },
+    { name: 'jewellery', label: 'Jewellery', icon: '💎', color: 'from-purple-500 to-indigo-500', bgColor: 'var(--white)', textColor: 'text-purple-600' },
+    { name: 'stoles-scarves', label: 'Stoles & Scarves', icon: '🧣', color: 'from-amber-500 to-orange-500', bgColor: 'var(--pink)', textColor: 'text-amber-600' }
   ];
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const ProductDetail = () => {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin text-green-600 mx-auto mb-4" />
+          <Loader className="w-12 h-12 animate-spin  mx-auto mb-4" style={{color: "var(--primary-color)"}} />
           <p className="text-gray-600">Loading product details...</p>
         </div>
       </div>
@@ -119,7 +119,8 @@ const ProductDetail = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg font-semibold"
+              className="px-6 py-3  rounded-lg font-semibold"
+              style={{ backgroundColor: 'var(--primary-color)', color: 'var(--pink)' }}
             >
               Back to Home
             </motion.button>
@@ -237,7 +238,7 @@ const ProductDetail = () => {
                     ) : (
                       <img
                         src={media.url}
-                        alt={`${product.name || 'Product'} ${index + 1}`}
+                        alt={`${product.name || ' Product'} ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                     )}
@@ -255,7 +256,7 @@ const ProductDetail = () => {
             className="bg-white rounded-xl p-4 md:p-8 shadow-lg"
           >
             <div className="flex flex-col md:flex-row justify-between items-start gap-3 mb-4">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">{product.name || 'Product'}</h1>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">{product.name || ''}</h1>
               <span className={`px-3 py-1 rounded-full text-xs md:text-sm capitalize whitespace-nowrap ${stockStatus.color}`}>
                 {stockStatus.text}
               </span>
@@ -270,7 +271,7 @@ const ProductDetail = () => {
               <span className="ml-2 text-xs md:text-sm text-gray-600">(128 reviews)</span>
             </div>
 
-            <p className="text-2xl md:text-3xl font-bold text-green-600 mb-4 md:mb-6">₹{product.price}</p>
+            <p className="text-2xl md:text-3xl font-bold  mb-4 md:mb-6"   style={{ color: 'var(--primary-color)' }}>₹{product.price}</p>
             
             <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 leading-relaxed">{product.description}</p>
 
@@ -293,7 +294,8 @@ const ProductDetail = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleWhatsApp}
-              className="w-full bg-green-500 text-white py-3 md:py-4 rounded-xl font-semibold flex items-center justify-center space-x-2 md:space-x-3 text-sm md:text-lg hover:bg-green-600 transition shadow-lg"
+              className="w-full py-3 md:py-4 rounded-xl font-semibold flex items-center justify-center space-x-2 md:space-x-3 text-sm md:text-lg hover:bg-green-600 transition shadow-lg"
+                style={{ backgroundColor: 'var(--primary-color)', color: 'var(--pink)' }}
             >
               <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
               <span>Contact via WhatsApp for Purchase</span>
@@ -363,11 +365,12 @@ const ProductDetail = () => {
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: catIndex * 0.2 }}
-                  className={`${otherCat.bgColor} rounded-xl md:rounded-2xl p-4 md:p-6`}
+                  className={` rounded-xl md:rounded-2xl p-4 md:p-6`}
+                  style={{ backgroundColor: otherCat.bgColor }}
                 >
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
                     <div className="flex items-center space-x-2 md:space-x-3">
-                      <span className="text-2xl md:text-3xl">{otherCat.icon}</span>
+                      {/* <span className="text-2xl md:text-3xl">{otherCat.icon}</span> */}
                       <h3 className={`text-xl md:text-2xl font-bold ${otherCat.textColor}`}>
                         {otherCat.label}
                       </h3>

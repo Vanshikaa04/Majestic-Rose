@@ -6,11 +6,12 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth' // Smooth scrolling
-    });
-  }, [pathname]);
+  // Small delay to ensure DOM is ready
+  const timeout = setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 50);
+  return () => clearTimeout(timeout);
+}, [pathname]);
 
   return null;
 };

@@ -51,7 +51,9 @@ const Navbar = () => {
       transition={{ duration: 0.5 }}
       className={`fixed w-full z-50 transition-all duration-300 ${
         scrolled ? 'bg-white shadow-lg py-2' : 'bg-transparent py-4'
+        
       }`}
+      style={{backgroundColor:"var(--primary-color)"}}
     >
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
@@ -61,11 +63,11 @@ const Navbar = () => {
               <motion.span
                 whileHover={{ scale: 1.05 }}
                 className="text-xl md:text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent leading-tight"
-                style={{color:"var(--primary-color)"}}
+                style={{color:"var(--pink)"}}
               >
                 Majestic Rose
               </motion.span>
-              <span className="text-xs text-gray-500 italic">Fashion Studio</span>
+              <span className="text-xs text-white italic">Fashion Studio</span>
             </div>
           </Link>
 
@@ -78,8 +80,8 @@ const Navbar = () => {
                   whileHover={{ scale: 1.1 }}
                   className={`cursor-pointer ${
                     location.pathname === item.path
-                      ? 'text-green-600 font-semibold'
-                      : 'text-gray-700 hover:text-green-600'
+                      ? 'text-yellow-200 font-semibold'
+                      : 'text-gray-400 hover:text-yellow-200'
                   }`}
                 >
                   <span>{item.name}</span>
@@ -93,8 +95,8 @@ const Navbar = () => {
                 whileHover={{ scale: 1.1 }}
                 className={`cursor-pointer ${
                   location.pathname === '/products/jewellery'
-                    ? 'text-green-600 font-semibold'
-                    : 'text-gray-700 hover:text-green-600'
+                    ? 'text-yellow-200 font-semibold'
+                    :  'text-gray-400 hover:text-yellow-200'
                 }`}
               >
                 <span>Jewellery</span>
@@ -107,8 +109,8 @@ const Navbar = () => {
                 whileHover={{ scale: 1.1 }}
                 className={`cursor-pointer ${
                   location.pathname === '/products/stoles-scarves'
-                    ? 'text-green-600 font-semibold'
-                    : 'text-gray-700 hover:text-green-600'
+                    ? 'text-yellow-200 font-semibold'
+                    :  'text-gray-400 hover:text-yellow-200'
                 }`}
               >
                 <span>Stoles & Scarves</span>
@@ -120,7 +122,7 @@ const Navbar = () => {
               <Link to="/admin">
                 <motion.span
                   whileHover={{ scale: 1.1 }}
-                  className="cursor-pointer text-gray-700 hover:text-green-600 font-medium"
+                  className="cursor-pointer text-gray-400 hover:text-yellow-200 font-medium"
                 >
                   Admin
                 </motion.span>
@@ -128,18 +130,18 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Desktop Right Icons - Removed cart, only user remains */}
+          {/* Desktop Right Icons -only user remains */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to={isAuthenticated ? '/admin' : '/login'}>
               <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <User className="w-6 h-6 text-gray-700" />
+                <User className="w-6 h-6 text-gray-400 hover:text-yellow-200" />
               </motion.button>
             </Link>
           </div>
 
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg  transition-colors text-white "
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -184,30 +186,10 @@ const Navbar = () => {
                   </motion.div>
                 </Link>
 
-                {/* Jewellery Subcategories */}
-                <div className="border-t border-gray-100 my-2"></div>
-                <div className="px-4 py-2">
-                  <p className="text-sm font-semibold text-gray-500 mb-2">JEWELLERY COLLECTIONS</p>
-                </div>
-                {jewellerySubcategories.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link key={item.name} to={item.path}>
-                      <motion.div
-                        whileHover={{ x: 10 }}
-                        className={`flex items-center space-x-3 px-4 py-3 pl-8 hover:bg-gray-50 transition-colors ${
-                          location.pathname === item.path ? 'bg-green-50 text-green-600 font-semibold' : 'text-gray-700'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        <span className="text-sm">{item.name}</span>
-                      </motion.div>
-                    </Link>
-                  );
-                })}
+      
 
                 {/* Stoles & Scarves */}
-                <div className="border-t border-gray-100 my-2"></div>
+                <div className="border-gray-100 my-2"></div>
                 <Link to="/products/stoles-scarves">
                   <motion.div
                     whileHover={{ x: 10 }}

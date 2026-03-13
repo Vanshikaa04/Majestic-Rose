@@ -1,18 +1,22 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, Loader } from 'lucide-react';
-import { AuthContext } from '../context/AuthContext'; // Import from context
+import { AuthContext } from '../context/AuthContext';
 import { ProductContext } from '../context/ProductContext';
 
 const Login = () => {
-  const {backendurl}= useContext(ProductContext);
+  const { backendurl } = useContext(ProductContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,16 +26,12 @@ const Login = () => {
     try {
       const response = await fetch(`${backendurl}/api/admin/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-
       const data = await response.json();
 
       if (response.ok) {
-        // Use the login function from AuthContext
         login(data.token, data.admin);
         navigate('/admin');
       } else {
@@ -46,7 +46,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen pt-20 flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
+    <div 
+      className="min-h-screen pt-20 flex items-center justify-center" 
+      style={{ backgroundColor: 'var(--pink)' }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -59,7 +62,7 @@ const Login = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="text-center mb-8"
         >
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold" style={{ color: 'var(--primary-color)' }}>
             Admin Login
           </h2>
           <p className="text-gray-600 mt-2">Access the product management dashboard</p>
@@ -88,7 +91,10 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                style={{ focus: { ringColor: 'var(--primary-color)' } }}
+                // Use arbitrary value for focus ring
+                onFocus={(e) => e.target.classList.add('focus:ring-[#0B2C33]')}
                 placeholder="admin@elegance.com"
                 required
               />
@@ -107,7 +113,7 @@ const Login = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33]"
                 placeholder="••••••••"
                 required
               />
@@ -119,7 +125,8 @@ const Login = () => {
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: 'var(--primary-color)' }}
           >
             {loading ? (
               <>
@@ -134,6 +141,8 @@ const Login = () => {
             )}
           </motion.button>
         </form>
+
+    
       </motion.div>
     </div>
   );
