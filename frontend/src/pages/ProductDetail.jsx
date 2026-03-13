@@ -69,7 +69,7 @@ const ProductDetail = () => {
       `Hi! I'm interested in ${product.name || 'this product'} (₹${product.price}).\n\n` +
       `Can you provide more details?`
     );
-    window.open(`https://wa.me/${product?.whatsappNumber?.replace('+', '') || '9979007261'}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${product?.whatsappNumber?.replace('+91', '') || '9979007261'}?text=${message}`, '_blank');
   };
 
   const nextMedia = () => {
