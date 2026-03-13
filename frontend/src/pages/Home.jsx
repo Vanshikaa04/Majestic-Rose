@@ -108,14 +108,14 @@ const Home = () => {
   return (
     <div className="pt-16">
       {/* Hero Section */}
-    <section className="relative h-screen flex items-center justify-center overflow-hidden bg-gray-100">
-  <div className="absolute inset-0 flex items-center justify-center" style={{backgroundColor:"var(--primary-color)"}}>
-    <img src="/majestic.jpg" alt="Hero" className="w-full h-full object-contain" />
+    <section className=" flex items-center justify-center overflow-hidden bg-gray-100 ">
+  <div className=" flex items-center justify-center" style={{backgroundColor:"var(--primary-color", height:"fit-content"}}>
+    <img src="/majestic.jpg" alt="Hero" className="w-50  object-cover" />
   </div>
 </section>
 
       {/* Features Section */}
-      <section className="py-20" style={{ backgroundColor: 'var(--secondary-color)' }}>
+      <section className="py-20 mt-5" style={{ backgroundColor: 'var(--secondary-color)' }}>
         <div className="container mx-auto px-4">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
