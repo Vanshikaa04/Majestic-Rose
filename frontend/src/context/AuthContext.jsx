@@ -1,6 +1,5 @@
 // context/AuthContext.jsx
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { ProductContext } from './ProductContext';
+import React, { createContext, useState, useEffect } from 'react';
 // Create and export the context
 export const AuthContext = createContext();
 
@@ -9,7 +8,8 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
-  const {backendurl}= useContext(ProductContext);
+   const backendurl = import.meta.env.VITE_backendurl ;
+
 
   useEffect(() => {
     checkAuth();
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+        ;
         if (response.ok) {
           setIsAuthenticated(true);
           setAdmin(JSON.parse(adminData));
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, admin, loading, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, admin, loading, login, logout, backendurl }}>
       {children}
     </AuthContext.Provider>
   );
