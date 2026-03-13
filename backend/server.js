@@ -16,12 +16,13 @@ const app = express();
 
 // Middleware
 const allowedOrigins = [
-    'http://localhost:5173',
-"https:/localhost:5000",
+"https://www.majesticrose.in",
 "https://majestic-rose-backend.vercel.app",
 "https://majestic-rose.vercel.app",
 "https://www.majesticrose.in/",
-"https://majesticrose.in/"
+"https://majesticrose.in/",
+    'http://localhost:5173',
+"https:/localhost:5000",
 
   ];
   

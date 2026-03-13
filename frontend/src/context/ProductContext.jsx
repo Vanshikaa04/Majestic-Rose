@@ -8,10 +8,10 @@ export { ProductContext };
 // Create and export the provider
 export const ProductProvider = ({ children }) => {
   const backendurl = import.meta.env.VITE_backendurl ;
-  console.log('Backend URL:', backendurl);
+  // console.log('Backend URL:', backendurl);
 
   const [products, setProducts] = useState([]);
-  console.log(products);
+  // console.log(products);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
