@@ -18,8 +18,8 @@ const app = express();
 const allowedOrigins = [
     'http://localhost:5173',
 "https:/localhost:5000",
-"https://majestic-rose-backend.vercel.app/",
-"https://majestic-rose.vercel.app/"
+"https://majestic-rose-backend.vercel.app",
+"https://majestic-rose.vercel.app"
 
   ];
   
@@ -52,11 +52,11 @@ console.log('MongoDB URI:', process.env.MONGODB_URI ? '✓ Set' : '✗ Missing')
 
 // Verify Cloudinary configuration
 const cloudinaryConfig = cloudinary.config();
-console.log('☁️ Cloudinary Config:', {
-  cloud_name: cloudinaryConfig.cloud_name ? '✓' : '✗',
-  api_key: cloudinaryConfig.api_key ? '✓' : '✗',
-  api_secret: cloudinaryConfig.api_secret ? '✓' : '✗'
-});
+// console.log('☁️ Cloudinary Config:', {
+//   cloud_name: cloudinaryConfig.cloud_name ? '✓' : '✗',
+//   api_key: cloudinaryConfig.api_key ? '✓' : '✗',
+//   api_secret: cloudinaryConfig.api_secret ? '✓' : '✗'
+// });
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI , {
@@ -393,8 +393,8 @@ app.get ('/',(req,res)=>{
     res.send("API WORKING")
 })
 
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => {
-//   console.log(`🚀 Server running on port ${PORT}`);
-//   console.log(`📝 Test the server: http://localhost:${PORT}/api/test`);
-// });
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📝 Test the server: http://localhost:${PORT}/api/test`);
+});

@@ -7,7 +7,7 @@ export { ProductContext };
 
 // Create and export the provider
 export const ProductProvider = ({ children }) => {
-  const backendurl = import.meta.env.VITE_backendurl;
+  const backendurl = import.meta.env.VITE_backendurl ;
   console.log('Backend URL:', backendurl);
 
   const [products, setProducts] = useState([]);
@@ -19,7 +19,7 @@ export const ProductProvider = ({ children }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(backendurl+'/api/products');
+      const response = await fetch(`${backendurl}/api/products`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch products');
