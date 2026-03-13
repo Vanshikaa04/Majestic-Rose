@@ -1,6 +1,5 @@
 // context/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { MainContext } from '../../../../code master tech/frontend/src/context/MainContext';
 import { ProductContext } from './ProductContext';
 // Create and export the context
 export const AuthContext = createContext();
