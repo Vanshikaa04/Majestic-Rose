@@ -19,7 +19,9 @@ const allowedOrigins = [
     'http://localhost:5173',
 "https:/localhost:5000",
 "https://majestic-rose-backend.vercel.app",
-"https://majestic-rose.vercel.app"
+"https://majestic-rose.vercel.app",
+"https://www.majesticrose.in/",
+"https://majesticrose.in/"
 
   ];
   

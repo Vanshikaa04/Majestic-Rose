@@ -14,14 +14,16 @@ import {
   Loader,
   Star,
   Filter,
-  RefreshCw
+  RefreshCw,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
 import { AuthContext } from '../context/AuthContext';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { products, fetchProducts, loading } = useContext(ProductContext);
+  const { products, fetchProducts, loading, uploadMedia, deleteMedia } = useContext(ProductContext);
   const { logout } = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -30,7 +32,8 @@ const AdminDashboard = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const {backendurl} = useContext(ProductContext)
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const { backendurl } = useContext(ProductContext);
 
   const stockStatusStyles = {
     instock: 'bg-green-100 text-green-800',
@@ -53,6 +56,10 @@ const AdminDashboard = () => {
     { value: 'rings', label: 'Rings' },
     { value: 'stoles-scarves', label: 'Stoles & Scarves' }
   ];
+
+  // Theme colors
+  const primaryColor = '#0B2C33';
+  const pinkColor = '#ffeeee';
 
   // Filter products by search and category
   const filteredProducts = products.filter(product => {
@@ -123,7 +130,6 @@ const AdminDashboard = () => {
   const handleEditFieldChange = (e) => {
     const { name, value } = e.target;
     
-    // If category changes to non-jewellery, clear subcategory
     if (name === 'category' && value !== 'jewellery') {
       setSelectedProduct(prev => ({
         ...prev,
@@ -138,71 +144,129 @@ const AdminDashboard = () => {
     }
   };
 
-const handleSaveEdit = async (e) => {
-  e.preventDefault();
-  
-  // Validate subcategory for jewellery
-  if (selectedProduct.category === 'jewellery' && !selectedProduct.subcategory) {
-    alert('Please select a subcategory for jewellery');
-    return;
-  }
-  
-  setIsSaving(true);
-  
-  try {
-    const token = localStorage.getItem('token');
+  // Handle adding new images
+  const handleAddImages = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setUploadingImages(true);
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      files.forEach(file => formData.append('media', file));
+
+      const response = await fetch(`${backendurl}/api/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+      const uploadedMedia = await response.json();
+
+      setSelectedProduct(prev => ({
+        ...prev,
+        media: [...prev.media, ...uploadedMedia]
+      }));
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      alert('Failed to upload images');
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  // Handle removing an image
+  const handleRemoveImage = async (mediaItem) => {
+    if (!window.confirm('Remove this image?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${backendurl}/api/delete-media`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ publicId: mediaItem.publicId, type: 'image' })
+      });
+
+      setSelectedProduct(prev => ({
+        ...prev,
+        media: prev.media.filter(m => m.publicId !== mediaItem.publicId)
+      }));
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert('Failed to delete image');
+    }
+  };
+
+  // Handle setting primary image
+  const handleSetPrimary = (index) => {
+    setSelectedProduct(prev => ({
+      ...prev,
+      media: prev.media.map((m, i) => ({ ...m, isPrimary: i === index }))
+    }));
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
     
-    // Build the update data dynamically
-    const updateData = {
-      category: selectedProduct.category,
-      price: Number(selectedProduct.price),
-      description: selectedProduct.description,
-      media: selectedProduct.media,
-      whatsappNumber: selectedProduct.whatsappNumber,
-      stockStatus: selectedProduct.stockStatus
-    };
-
-    // Add name if it exists
-    if (selectedProduct.name && selectedProduct.name.trim()) {
-      updateData.name = selectedProduct.name.trim();
+    if (selectedProduct.category === 'jewellery' && !selectedProduct.subcategory) {
+      alert('Please select a subcategory for jewellery');
+      return;
     }
+    
+    setIsSaving(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      const updateData = {
+        category: selectedProduct.category,
+        price: Number(selectedProduct.price),
+        description: selectedProduct.description,
+        media: selectedProduct.media,
+        whatsappNumber: selectedProduct.whatsappNumber,
+        stockStatus: selectedProduct.stockStatus
+      };
 
-    // CRITICAL: Only add subcategory for jewellery products
-    // For non-jewellery, do NOT include subcategory field at all
-    if (selectedProduct.category === 'jewellery') {
-      updateData.subcategory = selectedProduct.subcategory;
+      if (selectedProduct.name && selectedProduct.name.trim()) {
+        updateData.name = selectedProduct.name.trim();
+      }
+
+      if (selectedProduct.category === 'jewellery') {
+        updateData.subcategory = selectedProduct.subcategory;
+      }
+
+      const response = await fetch(`${backendurl}/api/products/${selectedProduct._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        await fetchProducts();
+        setIsEditModalOpen(false);
+        setSelectedProduct(null);
+        alert('Product updated successfully!');
+      } else {
+        console.error('Server error:', responseData);
+        alert(responseData.message || 'Error updating product');
+      }
+    } catch (error) {
+      console.error('Error updating product:', error);
+      alert(error.message || 'Error updating product');
+    } finally {
+      setIsSaving(false);
     }
-    // For fashion and stoles-scarves, we don't add subcategory
+  };
 
-    console.log('Sending update data:', updateData);
-
-    const response = await fetch(`${backendurl}/api/products/${selectedProduct._id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(updateData)
-    });
-
-    const responseData = await response.json();
-
-    if (response.ok) {
-      await fetchProducts();
-      setIsEditModalOpen(false);
-      setSelectedProduct(null);
-      alert('Product updated successfully!');
-    } else {
-      console.error('Server error:', responseData);
-      alert(responseData.message || 'Error updating product');
-    }
-  } catch (error) {
-    console.error('Error updating product:', error);
-    alert(error.message || 'Error updating product');
-  } finally {
-    setIsSaving(false);
-  }
-};
   const getCategoryDisplay = (product) => {
     if (product.category === 'jewellery' && product.subcategory) {
       const subcategoryLabels = {
@@ -229,7 +293,7 @@ const handleSaveEdit = async (e) => {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 mx-auto mb-4" style={{ borderColor: primaryColor }}></div>
           <p className="text-gray-600">Loading products...</p>
         </div>
       </div>
@@ -247,8 +311,8 @@ const handleSaveEdit = async (e) => {
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center space-x-3">
-              <Package className="w-8 h-8 text-green-600" />
-              <h1 className="text-2xl font-bold">Product Management</h1>
+              <Package className="w-8 h-8" style={{ color: primaryColor }} />
+              <h1 className="text-2xl font-bold" style={{ color: primaryColor }}>Product Management</h1>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
@@ -260,7 +324,9 @@ const handleSaveEdit = async (e) => {
                   placeholder="Search products..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2"
+                  style={{ focus: { ringColor: primaryColor } }}
+                  onFocus={(e) => e.target.classList.add('focus:ring-[#0B2C33]')}
                 />
                 {searchTerm && (
                   <button
@@ -278,7 +344,7 @@ const handleSaveEdit = async (e) => {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 appearance-none bg-white"
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33] appearance-none bg-white"
                 >
                   {categories.map(cat => (
                     <option key={cat.value} value={cat.value}>
@@ -294,7 +360,8 @@ const handleSaveEdit = async (e) => {
                 whileTap={{ scale: 0.95 }}
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="flex items-center justify-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
+                className="flex items-center justify-center space-x-2 text-white px-4 py-2 rounded-lg transition disabled:opacity-50"
+                style={{ backgroundColor: primaryColor }}
               >
                 <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
@@ -305,7 +372,8 @@ const handleSaveEdit = async (e) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => navigate('/admin/add-product')}
-                className="flex items-center justify-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                className="flex items-center justify-center space-x-2 text-white px-4 py-2 rounded-lg transition"
+                style={{ backgroundColor: primaryColor }}
               >
                 <Plus className="w-5 h-5" />
                 <span>Add Product</span>
@@ -327,41 +395,41 @@ const handleSaveEdit = async (e) => {
           {/* Stats Summary */}
           <div className="mt-4 pt-4 border-t grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{products.length}</p>
+              <p className="text-2xl font-bold" style={{ color: primaryColor }}>{products.length}</p>
               <p className="text-sm text-gray-600">Total</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold" style={{ color: primaryColor }}>
                 {products.filter(p => p.category === 'fashion').length}
               </p>
               <p className="text-sm text-gray-600">Fashion</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold" style={{ color: primaryColor }}>
                 {products.filter(p => p.category === 'jewellery').length}
               </p>
               <p className="text-sm text-gray-600">All Jewellery</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold" style={{ color: primaryColor }}>
                 {products.filter(p => p.subcategory === 'necklace').length}
               </p>
               <p className="text-sm text-gray-600">Necklace</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold" style={{ color: primaryColor }}>
                 {products.filter(p => p.subcategory === 'earrings').length}
               </p>
               <p className="text-sm text-gray-600">Earrings</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold" style={{ color: primaryColor }}>
                 {products.filter(p => p.subcategory === 'rings').length}
               </p>
               <p className="text-sm text-gray-600">Rings</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-2xl font-bold" style={{ color: primaryColor }}>
                 {products.filter(p => p.category === 'stoles-scarves').length}
               </p>
               <p className="text-sm text-gray-600">Stoles & Scarves</p>
@@ -384,7 +452,8 @@ const handleSaveEdit = async (e) => {
                   setSearchTerm('');
                   setSelectedCategory('all');
                 }}
-                className="mt-4 text-green-600 hover:underline"
+                className="mt-4 hover:underline"
+                style={{ color: primaryColor }}
               >
                 Clear filters
               </button>
@@ -419,8 +488,8 @@ const handleSaveEdit = async (e) => {
                       />
                       
                       {product.media?.find(m => m.isPrimary) && (
-                        <div className="absolute top-2 left-2 bg-green-600 text-white p-1 rounded-full">
-                          <Star className="w-3 h-3" />
+                        <div className="absolute top-2 left-2 p-1 rounded-full" style={{ backgroundColor: primaryColor }}>
+                          <Star className="w-3 h-3 text-white" />
                         </div>
                       )}
 
@@ -430,7 +499,7 @@ const handleSaveEdit = async (e) => {
                         </div>
                       )}
 
-                      <div className="absolute top-2 right-2 bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold">
+                      <div className="absolute top-2 right-2 px-2 py-1 rounded text-xs font-semibold text-white" style={{ backgroundColor: primaryColor }}>
                         {getCategoryDisplay(product)}
                       </div>
                     </div>
@@ -440,7 +509,7 @@ const handleSaveEdit = async (e) => {
                         {getDisplayName(product)}
                       </h3>
                       
-                      <p className="text-base lg:text-lg font-bold text-green-600 mb-2">
+                      <p className="text-base lg:text-lg font-bold mb-2" style={{ color: primaryColor }}>
                         ₹{product.price}
                       </p>
                       
@@ -494,7 +563,7 @@ const handleSaveEdit = async (e) => {
         )}
       </div>
 
-      {/* Edit Modal */}
+      {/* Edit Modal with Image Management */}
       <AnimatePresence>
         {isEditModalOpen && selectedProduct && (
           <motion.div
@@ -508,12 +577,12 @@ const handleSaveEdit = async (e) => {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold">Edit Product</h2>
+                  <h2 className="text-2xl font-bold" style={{ color: primaryColor }}>Edit Product</h2>
                   <button
                     onClick={() => !isSaving && setIsEditModalOpen(false)}
                     className="text-gray-500 hover:text-gray-700"
@@ -523,26 +592,82 @@ const handleSaveEdit = async (e) => {
                 </div>
 
                 <form onSubmit={handleSaveEdit}>
-                  {/* Image Preview */}
-                  {selectedProduct.media && selectedProduct.media.length > 0 && (
-                    <div className="mb-4">
-                      <label className="block text-gray-700 mb-2 font-semibold">Images</label>
-                      <div className="grid grid-cols-4 gap-2">
+                  {/* Image Management Section */}
+                  <div className="mb-6">
+                    <label className="block text-gray-700 mb-2 font-semibold">Product Images</label>
+                    
+                    {/* Existing Images Grid */}
+                    {selectedProduct.media && selectedProduct.media.length > 0 && (
+                      <div className="grid grid-cols-3 md:grid-cols-4 gap-3 mb-4">
                         {selectedProduct.media.map((media, idx) => (
-                          <div key={idx} className="relative">
+                          <div key={idx} className="relative group">
                             <div className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                              media.isPrimary ? 'border-green-600' : 'border-gray-200'
-                            }`}>
+                              media.isPrimary ? 'border-2' : 'border-gray-200'
+                            }`} style={media.isPrimary ? { borderColor: primaryColor } : {}}>
                               <img src={media.url} className="w-full h-full object-cover" />
                             </div>
+                            
+                            {/* Primary star */}
                             {media.isPrimary && (
-                              <Star className="absolute -top-1 -right-1 w-4 h-4 text-green-600 fill-current" />
+                              <div className="absolute top-1 right-1 p-1 rounded-full" style={{ backgroundColor: primaryColor }}>
+                                <Star className="w-3 h-3 text-white" />
+                              </div>
                             )}
+
+                            {/* Action buttons */}
+                            <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                              {!media.isPrimary && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleSetPrimary(idx)}
+                                  className="p-1.5 bg-white rounded-full hover:bg-gray-100"
+                                  title="Set as primary"
+                                >
+                                  <Star className="w-4 h-4" style={{ color: primaryColor }} />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(media)}
+                                className="p-1.5 bg-red-500 rounded-full hover:bg-red-600"
+                                title="Remove image"
+                              >
+                                <Trash2 className="w-4 h-4 text-white" />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
+                    )}
+
+                    {/* Add Images Button */}
+                    <div className="mt-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleAddImages}
+                        className="hidden"
+                        id="image-upload"
+                        disabled={uploadingImages}
+                      />
+                      <label
+                        htmlFor="image-upload"
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition ${
+                          uploadingImages ? 'opacity-50 cursor-not-allowed' : ''
+                        } text-white`}
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        {uploadingImages ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Upload className="w-4 h-4" />
+                        )}
+                        <span>{uploadingImages ? 'Uploading...' : 'Add More Images'}</span>
+                      </label>
+                      <p className="text-xs text-gray-500 mt-1">You can upload multiple images at once</p>
                     </div>
-                  )}
+                  </div>
 
                   {/* Category */}
                   <div className="mb-4">
@@ -552,7 +677,7 @@ const handleSaveEdit = async (e) => {
                       value={selectedProduct.category}
                       onChange={handleEditFieldChange}
                       required
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33]"
                     >
                       <option value="fashion">Fashion</option>
                       <option value="jewellery">Jewellery</option>
@@ -571,7 +696,7 @@ const handleSaveEdit = async (e) => {
                         value={selectedProduct.subcategory || ''}
                         onChange={handleEditFieldChange}
                         required
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33]"
                       >
                         <option value="">Select subcategory</option>
                         <option value="necklace">Necklace</option>
@@ -582,11 +707,6 @@ const handleSaveEdit = async (e) => {
                         <p className="text-xs text-red-500 mt-1">Subcategory is required for jewellery items</p>
                       )}
                     </div>
-                  )}
-
-                  {/* Hidden input for non-jewellery to ensure subcategory is null */}
-                  {selectedProduct.category !== 'jewellery' && (
-                    <input type="hidden" name="subcategory" value="" />
                   )}
 
                   {/* Name */}
@@ -601,7 +721,7 @@ const handleSaveEdit = async (e) => {
                       value={selectedProduct.name || ''}
                       onChange={handleEditFieldChange}
                       required={selectedProduct.category === 'fashion'}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33]"
                       placeholder={selectedProduct.category === 'fashion' ? "Enter product name" : "Enter name (optional)"}
                     />
                   </div>
@@ -617,7 +737,7 @@ const handleSaveEdit = async (e) => {
                       required
                       min="0"
                       step="1"
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33]"
                     />
                   </div>
 
@@ -629,7 +749,7 @@ const handleSaveEdit = async (e) => {
                       value={selectedProduct.stockStatus}
                       onChange={handleEditFieldChange}
                       required
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33]"
                     >
                       <option value="instock">In Stock</option>
                       <option value="soldout">Sold Out</option>
@@ -646,7 +766,7 @@ const handleSaveEdit = async (e) => {
                       value={selectedProduct.whatsappNumber}
                       onChange={handleEditFieldChange}
                       required
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33]"
                     />
                   </div>
 
@@ -659,7 +779,7 @@ const handleSaveEdit = async (e) => {
                       onChange={handleEditFieldChange}
                       required
                       rows="4"
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2C33]"
                     />
                   </div>
 
@@ -669,8 +789,9 @@ const handleSaveEdit = async (e) => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="submit"
-                      disabled={isSaving}
-                      className="flex-1 bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center"
+                      disabled={isSaving || uploadingImages}
+                      className="flex-1 text-white py-2 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center"
+                      style={{ backgroundColor: primaryColor }}
                     >
                       {isSaving ? (
                         <>
