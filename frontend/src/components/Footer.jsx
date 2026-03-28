@@ -52,9 +52,12 @@ const Footer = () => {
             <h3 className="text-2xl font-bold bg-gradient-to-r  bg-clip-text text-transparent" style={{color:"var(--pink)"}}>
               Majestic Rose
             </h3>
+            <p className="text-white ">   Feel rossy Everyday🌹 </p>
             <p className="text-gray-400 text-sm">
-              Fashion Studio - Bringing elegance and style to your wardrobe with premium quality fashion, jewellery, and scarves.
-            </p>
+Contemporary couture  | Pret | Custom Made<br/>
+Jewellery | Stoles & scarves <br/>
+Exclusive for women and kids</p>
+
             
             {/* Social Links */}
             <div className="flex space-x-4 pt-4">
@@ -212,17 +215,28 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="border-t border-gray-800 pt-6 mt-6"
-        >
-          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-            <p>© {currentYear} Majestic Rose. All rights reserved.</p>
-           
-          </div>
-        </motion.div>
+{/* Bottom Bar */}
+<motion.div
+  initial={{ opacity: 0 }}
+  whileInView={{ opacity: 1 }}
+  transition={{ duration: 0.5, delay: 0.4 }}
+  className="border-t border-gray-800 pt-6 mt-6"
+>
+  <div className="flex flex-col items-center justify-center text-center text-sm text-gray-400">
+    <p>© {currentYear} Majestic Rose. All rights reserved.</p>
+    <p className="mt-2">
+      Design & Developed by{' '}
+      <a
+        href="https://soulfulscribble.in"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-green-400 hover:text-green-300 transition-colors"
+      >
+        Soulful Scribble
+      </a>
+    </p>
+  </div>
+</motion.div>
       </div>
     </footer>
   );
