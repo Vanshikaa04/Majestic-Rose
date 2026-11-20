@@ -88,8 +88,6 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-
-
 // Admin Login
 app.post('/api/admin/login', async (req, res) => {
   try {
@@ -132,9 +130,9 @@ app.get('/api/admin/verify', verifyToken, (req, res) => {
   res.json({ valid: true, admin: req.admin });
 });
 
-app.put('/api/reorder-products', authMiddleware, async (req, res) => {
+app.put('/api/reorder-products', async (req, res) => {
   try {
-    const { items } = req.body;
+    const { items } = req.body; // [{ id, order }, ...]
     if (!Array.isArray(items)) {
       return res.status(400).json({ message: 'Invalid items array' });
     }
