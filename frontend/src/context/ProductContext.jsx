@@ -48,7 +48,7 @@ const reorderProducts = async (category, reorderedItems) => {
       order: index,
     }));
 
-    const response = await fetch(`${backendurl}/api/products/reorder`, {
+    const response = await fetch(`${backendurl}/api/reorder-products`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

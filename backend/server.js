@@ -88,6 +88,28 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+app.put('/api/reorder-products', authMiddleware, async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ message: 'Invalid items array' });
+    }
+
+    const bulkOps = items.map(({ id, order }) => ({
+      updateOne: {
+        filter: { _id: id },
+        update: { $set: { order } },
+      },
+    }));
+
+    await Product.bulkWrite(bulkOps);
+    res.json({ message: 'Products reordered successfully' });
+  } catch (error) {
+    console.error('Reorder error:', error);
+    res.status(500).json({ message: 'Failed to reorder products' });
+  }
+});
+
 // Admin Login
 app.post('/api/admin/login', async (req, res) => {
   try {
@@ -129,6 +151,8 @@ app.post('/api/admin/login', async (req, res) => {
 app.get('/api/admin/verify', verifyToken, (req, res) => {
   res.json({ valid: true, admin: req.admin });
 });
+
+
 
 // Get all products
 app.get('/api/products', async (req, res) => {
