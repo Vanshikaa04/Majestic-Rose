@@ -18,7 +18,8 @@ import {
   ChevronDown,
   Pen,
   Gem,
-  Clock,
+
+
   Quote,
 } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
@@ -360,14 +361,14 @@ const knownFor = [
   {
     icon: Gem,
     title: 'Classy & Elegant',
-    quote: 'Elegance is never loud. It lives in the cut, the finish and the way a piece makes you feel.',
+    quote: "A Contemporary fashion destination where individuality takes centre stage.",
     by: 'Majestic Rose',
     image: img1,
   },
   {
-    icon: Clock,
-    title: 'Timely Work',
-    quote: 'Your time matters to us. Every order is planned with care so it reaches you when we promised.',
+    icon: Pen,
+    title: 'Customisable & Personalised',
+    quote: 'We take pride in making fashion personal — offering customisation, creative flexibility and a thoughtful approach to every creation.',
     by: 'Majestic Rose',
     image: img2,
   },
@@ -380,7 +381,7 @@ const knownFor = [
   },
 ];
 
-const AUTOPLAY_MS = 7000;
+const AUTOPLAY_MS = 9000;
 
 const KnownSection = () => {
   const sectionRef = useRef(null);
