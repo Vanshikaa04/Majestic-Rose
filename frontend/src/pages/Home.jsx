@@ -381,7 +381,7 @@ const knownFor = [
   },
 ];
 
-const AUTOPLAY_MS = 9000;
+const AUTOPLAY_MS = 8000;
 
 const KnownSection = () => {
   const sectionRef = useRef(null);

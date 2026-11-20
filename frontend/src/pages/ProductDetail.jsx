@@ -1,20 +1,20 @@
 // pages/ProductDetail.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import whatsappIcon from '../assets/whatsapp.png';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Heart, 
-  MessageCircle, 
-  Star, 
-  Truck, 
-  Shield, 
+import {
+  Heart,
+  Star,
+  Truck,
+  Shield,
   Rocket,
   ChevronLeft,
   ChevronRight,
   Play,
   X,
   Loader,
-  ArrowRight
+  ArrowRight,
 } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
 
@@ -29,36 +29,57 @@ const ProductDetail = () => {
 
   // Define all categories
   const allCategories = [
-    { name: 'fashion', label: 'Fashion', icon: '👗', color: 'from-pink-500 to-rose-500', bgColor: 'var(--pink)', textColor: 'text-pink-600' },
-    { name: 'jewellery', label: 'Jewellery', icon: '💎', color: 'from-purple-500 to-indigo-500', bgColor: 'var(--white)', textColor: 'text-purple-600' },
-    { name: 'stoles-scarves', label: 'Stoles & Scarves', icon: '🧣', color: 'from-amber-500 to-orange-500', bgColor: 'var(--pink)', textColor: 'text-amber-600' }
+    {
+      name: 'fashion',
+      label: 'Fashion',
+      icon: '👗',
+      color: 'from-pink-500 to-rose-500',
+      bgColor: 'var(--pink)',
+      textColor: 'text-pink-600',
+    },
+    {
+      name: 'jewellery',
+      label: 'Jewellery',
+      icon: '💎',
+      color: 'from-purple-500 to-indigo-500',
+      bgColor: 'var(--white)',
+      textColor: 'text-purple-600',
+    },
+    {
+      name: 'stoles-scarves',
+      label: 'Stoles & Scarves',
+      icon: '🧣',
+      color: 'from-amber-500 to-orange-500',
+      bgColor: 'var(--pink)',
+      textColor: 'text-amber-600',
+    },
   ];
 
   useEffect(() => {
     if (products.length > 0) {
       // Find current product
-      const found = products.find(p => p._id === id);
+      const found = products.find((p) => p._id === id);
       setProduct(found);
-      
+
       if (found) {
         // Get recommended products (same category, excluding current)
         const sameCategory = products
-          .filter(p => p.category === found.category && p._id !== id)
+          .filter((p) => p.category === found.category && p._id !== id)
           .slice(0, 4);
-        
+
         // If less than 4 from same category, add from other categories
         if (sameCategory.length < 4) {
           const otherCategoriesProducts = products
-            .filter(p => p.category !== found.category)
+            .filter((p) => p.category !== found.category)
             .slice(0, 4 - sameCategory.length);
-          
+
           setRecommendedProducts([...sameCategory, ...otherCategoriesProducts]);
         } else {
           setRecommendedProducts(sameCategory);
         }
 
         // Get other categories (excluding current)
-        const others = allCategories.filter(c => c.name !== found.category);
+        const others = allCategories.filter((c) => c.name !== found.category);
         setOtherCategories(others);
       }
     }
@@ -67,41 +88,36 @@ const ProductDetail = () => {
   const handleWhatsApp = () => {
     const message = encodeURIComponent(
       `Hi! I'm interested in ${product.name || 'this product'} (₹${product.price}).\n\n` +
-      `Can you provide more details?`
+        `Can you provide more details?`
     );
     window.open('https://wa.me/919979007261?text=' + message, '_blank');
   };
 
   const nextMedia = () => {
-    setSelectedMediaIndex((prev) => 
-      prev === product.media.length - 1 ? 0 : prev + 1
-    );
+    setSelectedMediaIndex((prev) => (prev === product.media.length - 1 ? 0 : prev + 1));
   };
 
   const prevMedia = () => {
-    setSelectedMediaIndex((prev) => 
-      prev === 0 ? product.media.length - 1 : prev - 1
-    );
+    setSelectedMediaIndex((prev) => (prev === 0 ? product.media.length - 1 : prev - 1));
   };
 
   // Get products for other categories
   const getCategoryProducts = (categoryName) => {
     if (categoryName === 'jewellery') {
       // For jewellery, show products from all subcategories
-      return products
-        .filter(p => p.category === 'jewellery')
-        .slice(0, 4);
+      return products.filter((p) => p.category === 'jewellery').slice(0, 4);
     }
-    return products
-      .filter(p => p.category === categoryName)
-      .slice(0, 4);
+    return products.filter((p) => p.category === categoryName).slice(0, 4);
   };
 
   if (loading) {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin  mx-auto mb-4" style={{color: "var(--primary-color)"}} />
+          <Loader
+            className="w-12 h-12 animate-spin  mx-auto mb-4"
+            style={{ color: 'var(--primary-color)' }}
+          />
           <p className="text-gray-600">Loading product details...</p>
         </div>
       </div>
@@ -130,16 +146,19 @@ const ProductDetail = () => {
     );
   }
 
-  const currentMedia = product.media?.[selectedMediaIndex] || { type: 'image', url: 'https://via.placeholder.com/800x800' };
+  const currentMedia = product.media?.[selectedMediaIndex] || {
+    type: 'image',
+    url: 'https://via.placeholder.com/800x800',
+  };
   const features = [
     { icon: Truck, text: 'Delivery within 7-15 business days after Dispatch' },
-    { icon: Shield, text: "Free shipping on orders over ₹5000" },
-    { icon: Rocket, text: "Shipping Pan India" },
+    { icon: Shield, text: 'Free shipping on orders over ₹5000' },
+    { icon: Rocket, text: 'Shipping Pan India' },
   ];
 
   // Get stock status display
   const getStockStatus = () => {
-    switch(product.stockStatus) {
+    switch (product.stockStatus) {
       case 'instock':
         return { text: 'In Stock', color: 'bg-green-100 text-green-800' };
       case 'soldout':
@@ -179,11 +198,7 @@ const ProductDetail = () => {
               onClick={() => setIsModalOpen(true)}
             >
               {currentMedia.type === 'video' ? (
-                <video 
-                  src={currentMedia.url} 
-                  className="w-full h-full object-cover"
-                  controls
-                />
+                <video src={currentMedia.url} className="w-full h-full object-cover" controls />
               ) : (
                 <img
                   src={currentMedia.url}
@@ -201,13 +216,19 @@ const ProductDetail = () => {
               {product.media?.length > 1 && (
                 <>
                   <button
-                    onClick={(e) => { e.stopPropagation(); prevMedia(); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      prevMedia();
+                    }}
                     className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-full p-1.5 md:p-2 transition"
                   >
                     <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); nextMedia(); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      nextMedia();
+                    }}
                     className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-full p-1.5 md:p-2 transition"
                   >
                     <ChevronRight className="w-4 h-4 md:w-6 md:h-6" />
@@ -257,23 +278,35 @@ const ProductDetail = () => {
           >
             <div className="flex flex-col md:flex-row justify-between items-start gap-3 mb-4">
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">{product.name || ''}</h1>
-              <span className={`px-3 py-1 rounded-full text-xs md:text-sm capitalize whitespace-nowrap ${stockStatus.color}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-xs md:text-sm capitalize whitespace-nowrap ${stockStatus.color}`}
+              >
                 {stockStatus.text}
               </span>
             </div>
-            
+
             <div className="flex items-center mb-4">
               <div className="flex text-yellow-400">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 md:w-5 md:h-5 ${i < 4 ? 'fill-current' : ''}`} />
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 md:w-5 md:h-5 ${i < 4 ? 'fill-current' : ''}`}
+                  />
                 ))}
               </div>
               <span className="ml-2 text-xs md:text-sm text-gray-600">(128 reviews)</span>
             </div>
 
-            <p className="text-2xl md:text-3xl font-bold  mb-4 md:mb-6"   style={{ color: 'var(--primary-color)' }}>₹{product.price}</p>
-            
-            <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 leading-relaxed">{product.description}</p>
+            <p
+              className="text-2xl md:text-3xl font-bold  mb-4 md:mb-6"
+              style={{ color: 'var(--primary-color)' }}
+            >
+              ₹{product.price}
+            </p>
+
+            <p className="text-sm md:text-base text-gray-600 mb-4 md:mb-6 leading-relaxed">
+              {product.description}
+            </p>
 
             <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
               {features.map((feature, index) => (
@@ -295,9 +328,13 @@ const ProductDetail = () => {
               whileTap={{ scale: 0.98 }}
               onClick={handleWhatsApp}
               className="w-full py-3 md:py-4 rounded-xl font-semibold flex items-center justify-center space-x-2 md:space-x-3 text-sm md:text-lg hover:bg-green-600 transition shadow-lg"
-                style={{ backgroundColor: 'var(--primary-color)', color: 'var(--pink)' }}
+              style={{ backgroundColor: 'var(--primary-color)', color: 'var(--pink)' }}
             >
-              <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
+              <img
+                src={whatsappIcon}
+                alt="WhatsApp"
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 object-contain flex-shrink-0"
+              />
               <span>Contact via WhatsApp for Purchase</span>
             </motion.button>
           </motion.div>
@@ -306,13 +343,18 @@ const ProductDetail = () => {
         {/* Recommended Products Section */}
         {recommendedProducts.length > 0 && (
           <div className="mt-12 md:mt-16 mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 md:mb-4">You May Also Like</h2>
-            <p className="text-sm md:text-base text-gray-600 text-center mb-6 md:mb-8">Discover similar products from our collection</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 md:mb-4">
+              You May Also Like
+            </h2>
+            <p className="text-sm md:text-base text-gray-600 text-center mb-6 md:mb-8">
+              Discover similar products from our collection
+            </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
               {recommendedProducts.map((recProduct, index) => {
-                const recImage = recProduct.media?.[0]?.url || 'https://via.placeholder.com/300x300';
-                
+                const recImage =
+                  recProduct.media?.[0]?.url || 'https://via.placeholder.com/300x300';
+
                 return (
                   <motion.div
                     key={recProduct._id}
@@ -337,7 +379,9 @@ const ProductDetail = () => {
                           <h3 className="font-semibold text-xs md:text-sm mb-1 line-clamp-1 hover:text-green-600 transition">
                             {recProduct.name || 'Product'}
                           </h3>
-                          <p className="text-[10px] md:text-xs text-gray-500 capitalize">{recProduct.category}</p>
+                          <p className="text-[10px] md:text-xs text-gray-500 capitalize">
+                            {recProduct.category}
+                          </p>
                         </div>
                       </div>
                     </Link>
@@ -350,13 +394,17 @@ const ProductDetail = () => {
 
         {/* Other Categories Section */}
         <div className="mt-12 md:mt-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 md:mb-4">Explore Other Categories</h2>
-          <p className="text-sm md:text-base text-gray-600 text-center mb-6 md:mb-8">Discover more from our collection</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 md:mb-4">
+            Explore Other Categories
+          </h2>
+          <p className="text-sm md:text-base text-gray-600 text-center mb-6 md:mb-8">
+            Discover more from our collection
+          </p>
 
           <div className="space-y-8 md:space-y-12">
             {otherCategories.map((otherCat, catIndex) => {
               const categoryProducts = getCategoryProducts(otherCat.name);
-              
+
               if (categoryProducts.length === 0) return null;
 
               return (
@@ -389,8 +437,9 @@ const ProductDetail = () => {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                     {categoryProducts.map((product, idx) => {
-                      const productImage = product.media?.[0]?.url || 'https://via.placeholder.com/200x200';
-                      
+                      const productImage =
+                        product.media?.[0]?.url || 'https://via.placeholder.com/200x200';
+
                       return (
                         <motion.div
                           key={product._id}
@@ -412,7 +461,9 @@ const ProductDetail = () => {
                                 </div>
                               </div>
                               <div className="p-2 md:p-3">
-                                <h4 className="font-semibold text-[10px] md:text-sm line-clamp-1">{product.name || 'Product'}</h4>
+                                <h4 className="font-semibold text-[10px] md:text-sm line-clamp-1">
+                                  {product.name || 'Product'}
+                                </h4>
                               </div>
                             </div>
                           </Link>
@@ -444,10 +495,13 @@ const ProductDetail = () => {
               <X className="w-6 h-6 md:w-8 md:h-8" />
             </button>
 
-            <div className="relative w-full h-full flex items-center justify-center p-2 md:p-4" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="relative w-full h-full flex items-center justify-center p-2 md:p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
               {currentMedia.type === 'video' ? (
-                <video 
-                  src={currentMedia.url} 
+                <video
+                  src={currentMedia.url}
                   className="max-w-full max-h-[90vh]"
                   controls
                   autoPlay

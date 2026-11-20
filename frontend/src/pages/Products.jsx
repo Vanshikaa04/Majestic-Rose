@@ -2,8 +2,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, X, MessageCircle, Loader, ArrowRight } from 'lucide-react';
+import { Filter, X,  Loader, ArrowRight } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
+import whatsappIcon from '../assets/whatsapp.png';
 
 const Products = () => {
   const { category } = useParams();
@@ -21,7 +22,7 @@ const Products = () => {
   const allCategories = [
     { name: 'fashion', label: 'Fashion', color: 'from-pink-500 to-rose-500' },
     { name: 'jewellery', label: 'Jewellery', color: 'from-purple-500 to-indigo-500' },
-    { name: 'stoles-scarves', label: 'Stoles & Scarves', color: 'from-amber-500 to-orange-500' }
+    { name: 'stoles-scarves', label: 'Stoles & Scarves', color: 'from-amber-500 to-orange-500' },
   ];
 
   // Jewellery subcategories for filter
@@ -29,39 +30,39 @@ const Products = () => {
     { value: 'all', label: 'All Jewellery' },
     { value: 'rings', label: 'Rings' },
     { value: 'necklace', label: 'Neck Pieces' },
-    { value: 'earrings', label: 'Earrings' }
+    { value: 'earrings', label: 'Earrings' },
   ];
 
   useEffect(() => {
     if (products && products.length > 0) {
       let filtered = [];
-      
+
       if (category === 'jewellery') {
         // For jewellery, get all jewellery products sorted by createdAt ascending (oldest first)
         filtered = products
-          .filter(p => p.category === 'jewellery')
+          .filter((p) => p.category === 'jewellery')
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         setCategoryProducts(filtered);
-        
+
         // Apply subcategory filter if not 'all'
         if (jewellerySubFilter !== 'all') {
-          setFilteredProducts(filtered.filter(p => p.subcategory === jewellerySubFilter));
+          setFilteredProducts(filtered.filter((p) => p.subcategory === jewellerySubFilter));
         } else {
           setFilteredProducts(filtered);
         }
       } else {
         // For other categories, sort by createdAt ascending (oldest first)
         filtered = products
-          .filter(p => p.category === category)
+          .filter((p) => p.category === category)
           .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
         setCategoryProducts(filtered);
         setFilteredProducts(filtered);
       }
-      
+
       // Get other categories (excluding current)
-      const others = allCategories.filter(c => c.name !== category);
+      const others = allCategories.filter((c) => c.name !== category);
       setOtherCategories(others);
-      
+
       setLoading(false);
     }
   }, [products, category, jewellerySubFilter]);
@@ -69,15 +70,18 @@ const Products = () => {
   const handleWhatsApp = (product) => {
     const message = encodeURIComponent(
       `Hi! I'm interested in ${product.name || 'this product'} (₹${product.price}).\n\n` +
-      `Can you provide more details?`
+        `Can you provide more details?`
     );
-    window.open(`https://wa.me/${product.whatsappNumber?.replace('+', '') || '919979007261'}?text=${message}`, '_blank');
+    window.open(
+      `https://wa.me/${product.whatsappNumber?.replace('+', '') || '919979007261'}?text=${message}`,
+      '_blank'
+    );
   };
 
   // Get products for other categories (4 each) - For other categories section, we want latest 4
   const getOtherCategoryProducts = (categoryName) => {
     return products
-      .filter(p => p.category === categoryName)
+      .filter((p) => p.category === categoryName)
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Latest first for other categories
       .slice(0, 4);
   };
@@ -88,7 +92,7 @@ const Products = () => {
 
   const getCategoryDisplayName = () => {
     if (category === 'jewellery') {
-      const filter = jewelleryFilters.find(f => f.value === jewellerySubFilter);
+      const filter = jewelleryFilters.find((f) => f.value === jewellerySubFilter);
       return filter ? filter.label : 'Jewellery';
     }
     return category;
@@ -98,7 +102,10 @@ const Products = () => {
     return (
       <div className="pt-20 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin mx-auto mb-4" style={{color:"var(--primary-color)"}}/>
+          <Loader
+            className="w-12 h-12 animate-spin mx-auto mb-4"
+            style={{ color: 'var(--primary-color)' }}
+          />
           <p className="text-gray-600">Loading products...</p>
         </div>
       </div>
@@ -117,11 +124,14 @@ const Products = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8 text-center md:text-left"
         >
-          <h1 className="text-4xl md:text-5xl font-bold capitalize mb-4 bg-gradient-to-r  bg-clip-text text-transparent"  style={{color:"var(--primary-color)"}}>
+          <h1
+            className="text-4xl md:text-5xl font-bold capitalize mb-4 bg-gradient-to-r  bg-clip-text text-transparent"
+            style={{ color: 'var(--primary-color)' }}
+          >
             {category === 'jewellery' ? 'Jewellery Collection' : category}
           </h1>
           <p className="text-gray-600 text-lg">
-            {category === 'jewellery' 
+            {category === 'jewellery'
               ? 'Discover our exquisite collection of neckpieces, earrings, and rings'
               : `Discover our exclusive ${category} collection`}
           </p>
@@ -174,10 +184,11 @@ const Products = () => {
             >
               <AnimatePresence>
                 {displayProducts.map((product, index) => {
-                  const primaryImage = product.media?.find(m => m.isPrimary)?.url || 
-                                      product.media?.[0]?.url || 
-                                      'https://via.placeholder.com/400x400?text=No+Image';
-                  
+                  const primaryImage =
+                    product.media?.find((m) => m.isPrimary)?.url ||
+                    product.media?.[0]?.url ||
+                    'https://via.placeholder.com/400x400?text=No+Image';
+
                   return (
                     <motion.div
                       key={product._id}
@@ -197,7 +208,7 @@ const Products = () => {
                             alt={product.name || 'Product'}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
-                          
+
                           {product.media?.length > 1 && (
                             <div className="absolute top-2 left-2 bg-black bg-opacity-60 text-white px-1.5 py-0.5 rounded text-[10px] md:text-xs backdrop-blur-sm">
                               📸 {product.media.length}
@@ -205,10 +216,18 @@ const Products = () => {
                           )}
 
                           {/* Category/Subcategory Badge - Adjusted for mobile */}
-                          <div className="absolute top-2 right-2  px-1.5 py-0.5 rounded text-[10px] md:text-xs font-semibold uppercase tracking-wider" 
-                          style={{backgroundColor:"var(--pink)", color:"var(--primary-color)"}}
+                          <div
+                            className="absolute top-2 right-2  px-1.5 py-0.5 rounded text-[10px] md:text-xs font-semibold uppercase tracking-wider"
+                            style={{
+                              backgroundColor: 'var(--pink)',
+                              color: 'var(--primary-color)',
+                            }}
                           >
-                            {product.category === 'jewellery' ? product.subcategory : product.category === 'stoles-scarves' ? 'Stoles' : product.category}
+                            {product.category === 'jewellery'
+                              ? product.subcategory
+                              : product.category === 'stoles-scarves'
+                                ? 'Stoles'
+                                : product.category}
                           </div>
 
                           {/* Price Badge - Adjusted for mobile */}
@@ -221,7 +240,7 @@ const Products = () => {
                           <h3 className="font-semibold text-xs md:text-lg mb-1 hover:text-green-600 transition line-clamp-1">
                             {product.name || 'Product'}
                           </h3>
-                          
+
                           <p className="text-gray-500 text-[10px] md:text-sm mb-2 line-clamp-2 md:line-clamp-2 flex-grow">
                             {product.description}
                           </p>
@@ -235,11 +254,13 @@ const Products = () => {
                           whileTap={{ scale: 0.98 }}
                           onClick={() => handleWhatsApp(product)}
                           className="w-full   py-1.5 md:py-2.5 rounded-lg text-[10px] md:text-sm font-semibold flex items-center justify-center space-x-1 md:space-x-2 hover:bg-green-600 transition shadow-md"
-                          
-                          style={{backgroundColor:"var(--primary-color)", color:"var(--pink)"}}
-                        
+                          style={{ backgroundColor: 'var(--primary-color)', color: 'var(--pink)' }}
                         >
-                          <MessageCircle className="w-3 h-3 md:w-5 md:h-5" />
+                          <img
+                            src={whatsappIcon}
+                            alt="WhatsApp"
+                            className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 object-contain flex-shrink-0"
+                          />
                           <span className="hidden md:inline">Contact on WhatsApp</span>
                           <span className="md:hidden">WhatsApp</span>
                         </motion.button>
@@ -252,20 +273,25 @@ const Products = () => {
 
             {/* Results Count */}
             <div className="text-center text-gray-500 text-xs md:text-sm mb-12">
-              Showing {displayProducts.length} product{displayProducts.length > 1 ? 's' : ''} in {getCategoryDisplayName()}
+              Showing {displayProducts.length} product{displayProducts.length > 1 ? 's' : ''} in{' '}
+              {getCategoryDisplayName()}
             </div>
           </>
         )}
 
         {/* Other Categories Section */}
         <div className="mt-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">Explore Other Categories</h2>
-          <p className="text-gray-600 text-sm md:text-base text-center mb-8 md:mb-12">Discover more from our collection</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">
+            Explore Other Categories
+          </h2>
+          <p className="text-gray-600 text-sm md:text-base text-center mb-8 md:mb-12">
+            Discover more from our collection
+          </p>
 
           <div className="space-y-12 md:space-y-16">
             {otherCategories.map((otherCat, catIndex) => {
               const otherProducts = getOtherCategoryProducts(otherCat.name);
-              
+
               if (otherProducts.length === 0) return null;
 
               return (
@@ -279,7 +305,9 @@ const Products = () => {
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 md:mb-6 gap-2">
                     <div>
                       <h3 className="text-xl md:text-2xl font-bold">
-                        <span className={`bg-gradient-to-r ${otherCat.color} bg-clip-text text-transparent`}>
+                        <span
+                          className={`bg-gradient-to-r ${otherCat.color} bg-clip-text text-transparent`}
+                        >
                           {otherCat.label}
                         </span>
                       </h3>
@@ -292,7 +320,7 @@ const Products = () => {
                         whileHover={{ scale: 1.05, x: 5 }}
                         whileTap={{ scale: 0.95 }}
                         className="flex items-center space-x-1 md:space-x-2  text-sm md:text-base font-semibold hover:text-green-700"
-                         style={{color:"var(--primary-color)"}}
+                        style={{ color: 'var(--primary-color)' }}
                       >
                         <span>View All</span>
                         <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
@@ -302,8 +330,9 @@ const Products = () => {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
                     {otherProducts.map((product, idx) => {
-                      const productImage = product.media?.[0]?.url || 'https://via.placeholder.com/200x200';
-                      
+                      const productImage =
+                        product.media?.[0]?.url || 'https://via.placeholder.com/200x200';
+
                       return (
                         <motion.div
                           key={product._id}
@@ -326,7 +355,9 @@ const Products = () => {
                                 <p className="text-[10px] md:text-sm font-semibold text-white drop-shadow-lg line-clamp-1">
                                   {product.name || 'Product'}
                                 </p>
-                                <p className="text-[8px] md:text-xs text-white font-bold">₹{product.price}</p>
+                                <p className="text-[8px] md:text-xs text-white font-bold">
+                                  ₹{product.price}
+                                </p>
                               </div>
                             </div>
                           </Link>

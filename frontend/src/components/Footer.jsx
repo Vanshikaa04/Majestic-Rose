@@ -1,19 +1,19 @@
 // components/Footer.jsx
 import React from 'react';
+import whatsappIcon from '../assets/whatsapp.png';
 import { motion } from 'framer-motion';
-import { 
-  MapPin, 
-  Mail, 
-  Instagram, 
-  MessageCircle, 
-  Facebook, 
+import {
+  MapPin,
+  Mail,
+  Instagram,
+  Facebook,
   Twitter,
   Heart,
   ShoppingBagIcon,
   Gem,
   Scissors,
   Sparkles,
-  Crown
+  Crown,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -33,13 +33,16 @@ const Footer = () => {
   const mainCategories = [
     { name: 'Fashion', path: '/products/fashion', icon: ShoppingBagIcon, color: 'text-pink-400' },
     { name: 'Jewellery', path: '/products/jewellery', icon: Gem, color: 'text-purple-400' },
-    { name: 'Stoles & Scarves', path: '/products/stoles-scarves', icon: Scissors, color: 'text-blue-400' },
+    {
+      name: 'Stoles & Scarves',
+      path: '/products/stoles-scarves',
+      icon: Scissors,
+      color: 'text-blue-400',
+    },
   ];
 
-
-
   return (
-    <footer className="text-white pt-12 pb-6"  style={{backgroundColor:"var(--primary-color)"}}>
+    <footer className="text-white pt-12 pb-6" style={{ backgroundColor: 'var(--primary-color)' }}>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Brand Section */}
@@ -49,16 +52,20 @@ const Footer = () => {
             transition={{ duration: 0.5 }}
             className="space-y-4"
           >
-            <h3 className="text-2xl font-bold bg-gradient-to-r  bg-clip-text text-transparent" style={{color:"var(--pink)"}}>
+            <h3
+              className="text-2xl font-bold bg-gradient-to-r  bg-clip-text text-transparent"
+              style={{ color: 'var(--pink)' }}
+            >
               Majestic Rose
             </h3>
-            <p className="text-white ">   Feel rossy Everyday🌹 </p>
+            <p className="text-white "> Feel rossy Everyday🌹 </p>
             <p className="text-gray-400 text-sm">
-Contemporary couture  | Pret | Custom Made<br/>
-Jewellery | Stoles & scarves <br/>
-Exclusive for women and kids</p>
+              Contemporary couture | Pret | Custom Made
+              <br />
+              Jewellery | Stoles & scarves <br />
+              Exclusive for women and kids
+            </p>
 
-            
             {/* Social Links */}
             <div className="flex space-x-4 pt-4">
               <motion.button
@@ -69,16 +76,20 @@ Exclusive for women and kids</p>
               >
                 <Instagram className="w-5 h-5" />
               </motion.button>
-              
+
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleWhatsApp}
                 className="bg-green-500 p-2 rounded-full hover:bg-green-600 transition-colors"
               >
-                <MessageCircle className="w-5 h-5" />
+                <img
+                  src={whatsappIcon}
+                  alt="WhatsApp"
+                  className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 object-contain flex-shrink-0"
+                />
               </motion.button>
-              
+
               <motion.button
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
@@ -87,8 +98,6 @@ Exclusive for women and kids</p>
               >
                 <Facebook className="w-5 h-5" />
               </motion.button>
-              
-      
             </div>
           </motion.div>
 
@@ -99,14 +108,16 @@ Exclusive for women and kids</p>
             transition={{ duration: 0.5, delay: 0.1 }}
             className="space-y-4"
           >
-            <h4 className="text-lg font-semibold " style={{color:"var(--pink)"}}>Main Categories</h4>
+            <h4 className="text-lg font-semibold " style={{ color: 'var(--pink)' }}>
+              Main Categories
+            </h4>
             <ul className="space-y-3">
               {mainCategories.map((category) => {
                 // const Icon = category.icon;
                 return (
                   <li key={category.name}>
-                    <Link 
-                      to={category.path} 
+                    <Link
+                      to={category.path}
                       className="text-gray-400 hover:text-green-400 transition-colors flex items-center space-x-2"
                     >
                       {/* <Icon className={`w-4 h-4 ${category.color}`} /> */}
@@ -118,7 +129,6 @@ Exclusive for women and kids</p>
             </ul>
 
             {/* Jewellery Subcategories */}
-         
           </motion.div>
 
           {/* Contact Info */}
@@ -128,11 +138,17 @@ Exclusive for women and kids</p>
             transition={{ duration: 0.5, delay: 0.2 }}
             className="space-y-4"
           >
-            <h4 className="text-lg font-semibold " style={{color:"var(--pink)"}}>Contact Us</h4>
-            
+            <h4 className="text-lg font-semibold " style={{ color: 'var(--pink)' }}>
+              Contact Us
+            </h4>
+
             {/* Yukti Wadhwani - WhatsApp */}
             <div className="flex items-start space-x-3">
-              <MessageCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+              <img
+                src={whatsappIcon}
+                alt="WhatsApp"
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 object-contain flex-shrink-0"
+              />{' '}
               <div>
                 <p className="text-sm text-gray-300">Yukti Wadhwani</p>
                 <motion.button
@@ -174,14 +190,19 @@ Exclusive for women and kids</p>
             transition={{ duration: 0.5, delay: 0.3 }}
             className="space-y-4"
           >
-            <h4 className="text-lg font-semibold " style={{color:"var(--pink)"}}>Visit Us</h4>
-            
+            <h4 className="text-lg font-semibold " style={{ color: 'var(--pink)' }}>
+              Visit Us
+            </h4>
+
             <div className="flex items-start space-x-3">
               <MapPin className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-gray-300">
-                73, Rajkumari Nivas Arvalli Society,<br />
-                Idar, Sabarkantha, Gujarat,<br />
-                Valasana Road, Mahavirnagar,<br />
+                73, Rajkumari Nivas Arvalli Society,
+                <br />
+                Idar, Sabarkantha, Gujarat,
+                <br />
+                Valasana Road, Mahavirnagar,
+                <br />
                 Idar - 383430, Gujarat
               </p>
             </div>
@@ -200,7 +221,7 @@ Exclusive for women and kids</p>
                 className=" transition-all duration-300"
               ></iframe>
             </div>
-            
+
             {/* Map Link */}
             <motion.a
               whileHover={{ scale: 1.02 }}
@@ -215,28 +236,28 @@ Exclusive for women and kids</p>
         </div>
 
         {/* Bottom Bar */}
-{/* Bottom Bar */}
-<motion.div
-  initial={{ opacity: 0 }}
-  whileInView={{ opacity: 1 }}
-  transition={{ duration: 0.5, delay: 0.4 }}
-  className="border-t border-gray-800 pt-6 mt-6"
->
-  <div className="flex flex-col items-center justify-center text-center text-sm text-gray-400">
-    <p>© {currentYear} Majestic Rose. All rights reserved.</p>
-    <p className="mt-2">
-      Design & Developed by{' '}
-      <a
-        href="https://soulfulscribble.in"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-green-400 hover:text-green-300 transition-colors"
-      >
-        Soulful Scribble
-      </a>
-    </p>
-  </div>
-</motion.div>
+        {/* Bottom Bar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="border-t border-gray-800 pt-6 mt-6"
+        >
+          <div className="flex flex-col items-center justify-center text-center text-sm text-gray-400">
+            <p>© {currentYear} Majestic Rose. All rights reserved.</p>
+            <p className="mt-2">
+              Design & Developed by{' '}
+              <a
+                href="https://soulfulscribble.in"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-400 hover:text-green-300 transition-colors"
+              >
+                Soulful Scribble
+              </a>
+            </p>
+          </div>
+        </motion.div>
       </div>
     </footer>
   );
