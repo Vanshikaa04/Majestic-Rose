@@ -16,25 +16,30 @@ export const ProductProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // Fetch all products from the database
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${backendurl}/api/products`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch products');
-      }
-      
-      const data = await response.json();
-      setProducts(data);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
+const fetchProducts = async () => {
+  try {
+    setLoading(true);
+    const response = await fetch(`${backendurl}/api/products`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch products');
     }
-  };
+    const data = await response.json();
+
+    // Sort by admin-defined `order` first, falling back to newest items
+    const sortedProducts = [...data].sort((a, b) => {
+      const orderA = typeof a.order === 'number' ? a.order : Number.MAX_SAFE_INTEGER;
+      const orderB = typeof b.order === 'number' ? b.order : Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
+
+    setProducts(sortedProducts);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
 const reorderProducts = async (category, reorderedItems) => {
   try {

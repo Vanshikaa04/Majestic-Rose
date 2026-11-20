@@ -1,17 +1,14 @@
 // pages/Products.jsx
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, X,  Loader, ArrowRight } from 'lucide-react';
+import { Loader, ArrowRight } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
 import whatsappIcon from '../assets/whatsapp.png';
 
 const Products = () => {
   const { category } = useParams();
-  const navigate = useNavigate();
   const { products, loading: contextLoading } = useContext(ProductContext);
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [categoryProducts, setCategoryProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [otherCategories, setOtherCategories] = useState([]);
@@ -33,28 +30,31 @@ const Products = () => {
     { value: 'earrings', label: 'Earrings' },
   ];
 
+  // Sort by admin-defined `order` ascending, falling back to `createdAt`
+  const sortByAdminOrder = (list) => {
+    return [...list].sort((a, b) => {
+      const orderA = typeof a.order === 'number' ? a.order : Number.MAX_SAFE_INTEGER;
+      const orderB = typeof b.order === 'number' ? b.order : Number.MAX_SAFE_INTEGER;
+      if (orderA !== orderB) return orderA - orderB;
+      return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+    });
+  };
+
   useEffect(() => {
-    if (products && products.length > 0) {
+    if (products) {
       let filtered = [];
 
       if (category === 'jewellery') {
-        // For jewellery, get all jewellery products sorted by createdAt ascending (oldest first)
-        filtered = products
-          .filter((p) => p.category === 'jewellery')
-          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        filtered = sortByAdminOrder(products.filter((p) => p.category === 'jewellery'));
         setCategoryProducts(filtered);
 
-        // Apply subcategory filter if not 'all'
         if (jewellerySubFilter !== 'all') {
           setFilteredProducts(filtered.filter((p) => p.subcategory === jewellerySubFilter));
         } else {
           setFilteredProducts(filtered);
         }
       } else {
-        // For other categories, sort by createdAt ascending (oldest first)
-        filtered = products
-          .filter((p) => p.category === category)
-          .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        filtered = sortByAdminOrder(products.filter((p) => p.category === category));
         setCategoryProducts(filtered);
         setFilteredProducts(filtered);
       }
@@ -78,12 +78,9 @@ const Products = () => {
     );
   };
 
-  // Get products for other categories (4 each) - For other categories section, we want latest 4
+  // Get products for other categories (4 each) respecting admin reorder sequence
   const getOtherCategoryProducts = (categoryName) => {
-    return products
-      .filter((p) => p.category === categoryName)
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // Latest first for other categories
-      .slice(0, 4);
+    return sortByAdminOrder(products.filter((p) => p.category === categoryName)).slice(0, 4);
   };
 
   const handleSubFilterChange = (filter) => {
@@ -125,7 +122,7 @@ const Products = () => {
           className="mb-8 text-center md:text-left"
         >
           <h1
-            className="text-4xl md:text-5xl font-bold capitalize mb-4 bg-gradient-to-r  bg-clip-text text-transparent"
+            className="text-4xl md:text-5xl font-bold capitalize mb-4 bg-gradient-to-r bg-clip-text text-transparent"
             style={{ color: 'var(--primary-color)' }}
           >
             {category === 'jewellery' ? 'Jewellery Collection' : category}
@@ -217,7 +214,7 @@ const Products = () => {
 
                           {/* Category/Subcategory Badge - Adjusted for mobile */}
                           <div
-                            className="absolute top-2 right-2  px-1.5 py-0.5 rounded text-[10px] md:text-xs font-semibold uppercase tracking-wider"
+                            className="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] md:text-xs font-semibold uppercase tracking-wider"
                             style={{
                               backgroundColor: 'var(--pink)',
                               color: 'var(--primary-color)',
@@ -241,7 +238,7 @@ const Products = () => {
                             {product.name || 'Product'}
                           </h3>
 
-                          <p className="text-gray-500 text-[10px] md:text-sm mb-2 line-clamp-2 md:line-clamp-2 flex-grow">
+                          <p className="text-gray-500 text-[10px] md:text-sm mb-2 line-clamp-2 flex-grow">
                             {product.description}
                           </p>
                         </div>
@@ -253,7 +250,7 @@ const Products = () => {
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => handleWhatsApp(product)}
-                          className="w-full   py-1.5 md:py-2.5 rounded-lg text-[10px] md:text-sm font-semibold flex items-center justify-center space-x-1 md:space-x-2 hover:bg-green-600 transition shadow-md"
+                          className="w-full py-1.5 md:py-2.5 rounded-lg text-[10px] md:text-sm font-semibold flex items-center justify-center space-x-1 md:space-x-2 hover:bg-green-600 transition shadow-md"
                           style={{ backgroundColor: 'var(--primary-color)', color: 'var(--pink)' }}
                         >
                           <img
@@ -319,7 +316,7 @@ const Products = () => {
                       <motion.button
                         whileHover={{ scale: 1.05, x: 5 }}
                         whileTap={{ scale: 0.95 }}
-                        className="flex items-center space-x-1 md:space-x-2  text-sm md:text-base font-semibold hover:text-green-700"
+                        className="flex items-center space-x-1 md:space-x-2 text-sm md:text-base font-semibold hover:text-green-700"
                         style={{ color: 'var(--primary-color)' }}
                       >
                         <span>View All</span>
@@ -331,7 +328,9 @@ const Products = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
                     {otherProducts.map((product, idx) => {
                       const productImage =
-                        product.media?.[0]?.url || 'https://via.placeholder.com/200x200';
+                        product.media?.find((m) => m.isPrimary)?.url ||
+                        product.media?.[0]?.url ||
+                        'https://via.placeholder.com/200x200';
 
                       return (
                         <motion.div
