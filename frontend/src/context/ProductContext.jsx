@@ -36,6 +36,44 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
+const reorderProducts = async (category, reorderedItems) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication required. Please log in again.');
+    }
+
+    const itemsPayload = reorderedItems.map((product, index) => ({
+      id: product._id,
+      order: index,
+    }));
+
+    const response = await fetch(`${backendurl}/api/products/reorder`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        category,
+        items: itemsPayload,
+      }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.message || 'Failed to save product order');
+    }
+
+    // Refresh products in context so Home.jsx & category pages update immediately
+    await fetchProducts();
+    return { success: true };
+  } catch (error) {
+    console.error('Error reordering products:', error);
+    return { success: false, message: error.message };
+  }
+};
+
   // Fetch products by category
   const fetchProductsByCategory = async (category) => {
     try {
@@ -89,6 +127,7 @@ export const ProductProvider = ({ children }) => {
     fetchProductsByCategory,
     getProductById,
     setProducts,
+    reorderProducts,
     backendurl
   };
 

@@ -2,12 +2,14 @@
 import React, { useContext, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Camera, X, Upload, Loader, Star, Image as ImageIcon } from 'lucide-react';
+import { X, Loader, Star, Image as ImageIcon, Plus } from 'lucide-react';
 import { ProductContext } from '../context/ProductContext';
+
+const MAX_IMAGES = 6;
 
 const AddProduct = () => {
   const navigate = useNavigate();
-  const {backendurl}=useContext(ProductContext);
+  const { backendurl } = useContext(ProductContext);
   const [formData, setFormData] = useState({
     name: '',
     category: 'fashion',
@@ -16,7 +18,7 @@ const AddProduct = () => {
     description: '',
     media: [],
     whatsappNumber: '+919979007261',
-    stockStatus: 'instock'
+    stockStatus: 'instock',
   });
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -27,123 +29,152 @@ const AddProduct = () => {
   const mainCategories = [
     { value: 'fashion', label: 'Fashion' },
     { value: 'jewellery', label: 'Jewellery' },
-    { value: 'stoles-scarves', label: 'Stoles & Scarves' }
+    { value: 'stoles-scarves', label: 'Stoles & Scarves' },
   ];
 
   const jewellerySubcategories = [
     { value: 'necklace', label: 'Necklace' },
     { value: 'earrings', label: 'Earrings' },
-    { value: 'rings', label: 'Rings' }
+    { value: 'rings', label: 'Rings' },
   ];
 
   const stockOptions = [
     { value: 'instock', label: 'In Stock', color: 'bg-green-100 text-green-800' },
     { value: 'soldout', label: 'Sold Out', color: 'bg-red-100 text-red-800' },
-    { value: 'customization', label: 'Customization Available', color: 'bg-purple-100 text-purple-800' }
+    { value: 'customization', label: 'Customization Available', color: 'bg-purple-100 text-purple-800' },
   ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Reset subcategory when category changes from jewellery to something else
     if (name === 'category' && value !== 'jewellery') {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [name]: value,
-        subcategory: ''
+        subcategory: '',
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
 
   const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files);
-    setSelectedFiles(prev => [...prev, ...files]);
-    
-    const newPreviews = files.map(file => ({
+    const files = Array.from(e.target.files || []);
+    // Clear input so the same file can be re-selected later if removed
+    e.target.value = '';
+
+    if (files.length === 0) return;
+
+    const currentCount = formData.media.length;
+    const remainingSlots = MAX_IMAGES - currentCount;
+
+    if (remainingSlots <= 0) {
+      alert(`Maximum ${MAX_IMAGES} images allowed per product.`);
+      return;
+    }
+
+    let filesToAdd = files;
+    if (files.length > remainingSlots) {
+      alert(
+        `You can only add ${remainingSlots} more image(s) (maximum ${MAX_IMAGES} per product). Only the first ${remainingSlots} selected file(s) were added.`
+      );
+      filesToAdd = files.slice(0, remainingSlots);
+    }
+
+    setSelectedFiles((prev) => [...prev, ...filesToAdd]);
+
+    const newPreviews = filesToAdd.map((file, idx) => ({
       file,
       preview: URL.createObjectURL(file),
-      isPrimary: false
+      isPrimary: currentCount === 0 && idx === 0,
     }));
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      media: [...prev.media, ...newPreviews]
+      media: [...prev.media, ...newPreviews],
     }));
   };
 
   const removeFile = (index) => {
-    if (formData.media[index]?.preview) {
-      URL.revokeObjectURL(formData.media[index].preview);
+    const targetMedia = formData.media[index];
+    if (!targetMedia) return;
+
+    if (targetMedia.preview) {
+      URL.revokeObjectURL(targetMedia.preview);
     }
-    
-    setFormData(prev => ({
-      ...prev,
-      media: prev.media.filter((_, i) => i !== index)
-    }));
-    
-    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+
+    setFormData((prev) => {
+      const updatedMedia = prev.media.filter((_, i) => i !== index);
+      if (updatedMedia.length > 0 && !updatedMedia.some((m) => m.isPrimary)) {
+        updatedMedia[0].isPrimary = true;
+      }
+      return {
+        ...prev,
+        media: updatedMedia,
+      };
+    });
   };
 
   const setPrimaryMedia = (index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       media: prev.media.map((media, i) => ({
         ...media,
-        isPrimary: i === index
-      }))
+        isPrimary: i === index,
+      })),
     }));
   };
 
   const uploadFilesToCloudinary = async () => {
     if (selectedFiles.length === 0) return [];
-    
+
     setUploading(true);
     setUploadProgress(0);
-    
+
     const uploadData = new FormData();
-    selectedFiles.forEach(file => {
+    selectedFiles.forEach((file) => {
       uploadData.append('media', file);
     });
-    
+
     try {
       const token = localStorage.getItem('token');
-      
+
       if (!token) {
         throw new Error('You must be logged in to upload files');
       }
 
-      const response = await fetch(backendurl+'/api/upload', {
+      const response = await fetch(`${backendurl}/api/upload`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: uploadData
+        body: uploadData,
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Upload failed');
       }
-      
+
       const uploadedMedia = await response.json();
-      
+
       if (!Array.isArray(uploadedMedia)) {
         throw new Error('Invalid response format');
       }
-      
+
       const mediaWithPrimary = uploadedMedia.map((media, index) => ({
         ...media,
-        isPrimary: formData.media[index]?.isPrimary || false
+        isPrimary: formData.media[index]?.isPrimary || false,
       }));
-      
+
       setUploadProgress(100);
       return mediaWithPrimary;
-      
     } catch (error) {
       console.error('Upload error:', error);
       setUploadError(error.message || 'Error uploading files');
@@ -156,104 +187,110 @@ const AddProduct = () => {
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (selectedFiles.length === 0) {
-    alert('Please select at least one image');
-    return;
-  }
-  
-  // Validate based on category
-  if (formData.category === 'fashion' && !formData.name.trim()) {
-    alert('Product name is required for Fashion category');
-    return;
-  }
-  
-  if (formData.category === 'jewellery' && !formData.subcategory) {
-    alert('Please select a subcategory for jewellery');
-    return;
-  }
-  
-  setIsSubmitting(true);
-  setUploadError('');
-  
-  try {
-    const uploadedMedia = await uploadFilesToCloudinary();
-    
-    if (uploadedMedia.length === 0) {
-      throw new Error('Failed to upload images');
-    }
-    
-    if (!uploadedMedia.some(m => m.isPrimary)) {
-      uploadedMedia[0].isPrimary = true;
-    }
-    
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      alert('Session expired. Please login again.');
-      navigate('/login');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (selectedFiles.length === 0) {
+      alert('Please select at least one image');
       return;
     }
 
-    // Build the product data object with proper types
-    const productData = {
-      category: formData.category,
-      price: Number(formData.price), // Ensure price is a number
-      description: formData.description,
-      media: uploadedMedia,
-      whatsappNumber: formData.whatsappNumber,
-      stockStatus: formData.stockStatus
-    };
-
-    // Add name if it exists
-    if (formData.name && formData.name.trim()) {
-      productData.name = formData.name.trim();
+    if (selectedFiles.length > MAX_IMAGES) {
+      alert(`Maximum ${MAX_IMAGES} images allowed per product.`);
+      return;
     }
 
-    // Add subcategory for jewellery
-    if (formData.category === 'jewellery') {
-      productData.subcategory = formData.subcategory; // This should be a string like 'earrings'
+    // Validate based on category
+    if (formData.category === 'fashion' && !formData.name.trim()) {
+      alert('Product name is required for Fashion category');
+      return;
     }
 
-    console.log('Sending product data (stringified):', JSON.stringify(productData, null, 2));
+    if (formData.category === 'jewellery' && !formData.subcategory) {
+      alert('Please select a subcategory for jewellery');
+      return;
+    }
 
-    const response = await fetch(backendurl+'/api/products', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(productData)
-    });
+    setIsSubmitting(true);
+    setUploadError('');
 
-    const responseData = await response.json();
+    try {
+      const uploadedMedia = await uploadFilesToCloudinary();
 
-    if (response.ok) {
-      alert('Product added successfully!');
-      formData.media.forEach(media => {
-        if (media.preview) URL.revokeObjectURL(media.preview);
-      });
-      navigate('/admin');
-    } else {
-      console.error('Server error:', responseData);
-      
-      // Show more detailed error
-      if (responseData.errors) {
-        const errorMessages = Object.values(responseData.errors).map(err => err.message).join('\n');
-        alert(`Validation Error:\n${errorMessages}`);
-      } else {
-        alert(responseData.message || 'Error adding product');
+      if (uploadedMedia.length === 0) {
+        throw new Error('Failed to upload images');
       }
+
+      if (!uploadedMedia.some((m) => m.isPrimary)) {
+        uploadedMedia[0].isPrimary = true;
+      }
+
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        alert('Session expired. Please login again.');
+        navigate('/login');
+        return;
+      }
+
+      // Build the product data object with proper types
+      const productData = {
+        category: formData.category,
+        price: Number(formData.price),
+        description: formData.description,
+        media: uploadedMedia,
+        whatsappNumber: formData.whatsappNumber,
+        stockStatus: formData.stockStatus,
+      };
+
+      // Add name if it exists
+      if (formData.name && formData.name.trim()) {
+        productData.name = formData.name.trim();
+      }
+
+      // Add subcategory for jewellery
+      if (formData.category === 'jewellery') {
+        productData.subcategory = formData.subcategory;
+      }
+
+      const response = await fetch(`${backendurl}/api/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(productData),
+      });
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        alert('Product added successfully!');
+        formData.media.forEach((media) => {
+          if (media.preview) URL.revokeObjectURL(media.preview);
+        });
+        navigate('/admin');
+      } else {
+        console.error('Server error:', responseData);
+
+        if (responseData.errors) {
+          const errorMessages = Object.values(responseData.errors)
+            .map((err) => err.message)
+            .join('\n');
+          alert(`Validation Error:\n${errorMessages}`);
+        } else {
+          alert(responseData.message || 'Error adding product');
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert(error.message || 'Error adding product');
+    } finally {
+      setIsSubmitting(false);
     }
-  } catch (error) {
-    console.error('Error:', error);
-    alert(error.message || 'Error adding product');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
+
+  const isMaxReached = formData.media.length >= MAX_IMAGES;
 
   return (
     <div className="pt-20 min-h-screen bg-gray-50">
@@ -272,16 +309,22 @@ const handleSubmit = async (e) => {
                 Product Images <span className="text-red-500">*</span>
               </label>
               <p className="text-sm text-gray-500 mb-3">
-                Select images (will be uploaded when you submit the form)
+                Select up to {MAX_IMAGES} images at once (or add more later when editing, up to {MAX_IMAGES} total)
               </p>
-              
+
               {uploadError && (
                 <div className="mb-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
                   {uploadError}
                 </div>
               )}
-              
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
+
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                  isMaxReached
+                    ? 'border-gray-200 bg-gray-50'
+                    : 'border-gray-300 hover:border-green-400'
+                }`}
+              >
                 <input
                   type="file"
                   accept="image/*"
@@ -289,18 +332,24 @@ const handleSubmit = async (e) => {
                   onChange={handleFileSelect}
                   className="hidden"
                   id="media-upload"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isMaxReached}
                 />
-                <label 
+                <label
                   htmlFor="media-upload"
-                  className={`cursor-pointer block ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`block ${
+                    isSubmitting || isMaxReached
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'cursor-pointer'
+                  }`}
                 >
                   <ImageIcon className="w-12 h-12 mx-auto text-gray-400 mb-2" />
                   <span className="text-gray-600 font-medium">
-                    Click to select images
+                    {isMaxReached
+                      ? `Maximum ${MAX_IMAGES} images selected`
+                      : 'Click to select images'}
                   </span>
                   <p className="text-sm text-gray-400 mt-1">
-                    Supports: JPG, PNG, GIF (max 10 files)
+                    Supports: JPG, PNG, WEBP (max {MAX_IMAGES} files)
                   </p>
                 </label>
               </div>
@@ -319,7 +368,7 @@ const handleSubmit = async (e) => {
                       <span className="text-sm text-gray-600">{uploadProgress}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <motion.div 
+                      <motion.div
                         className="bg-green-600 h-2 rounded-full"
                         initial={{ width: 0 }}
                         animate={{ width: `${uploadProgress}%` }}
@@ -335,7 +384,7 @@ const handleSubmit = async (e) => {
                 <div className="mt-6">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold">
-                      Selected Images ({formData.media.length}/10)
+                      Selected Images ({formData.media.length}/{MAX_IMAGES})
                     </h3>
                     <p className="text-xs text-gray-500">
                       Click <Star className="w-3 h-3 inline text-green-600" /> to set as primary
@@ -350,11 +399,13 @@ const handleSubmit = async (e) => {
                         exit={{ opacity: 0, scale: 0.8 }}
                         className="relative group"
                       >
-                        <div className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                          media.isPrimary ? 'border-green-600 shadow-lg' : 'border-gray-200'
-                        }`}>
-                          <img 
-                            src={media.preview} 
+                        <div
+                          className={`aspect-square rounded-lg overflow-hidden border-2 ${
+                            media.isPrimary ? 'border-green-600 shadow-lg' : 'border-gray-200'
+                          }`}
+                        >
+                          <img
+                            src={media.preview}
                             alt={`Preview ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
@@ -394,6 +445,20 @@ const handleSubmit = async (e) => {
                         </div>
                       </motion.div>
                     ))}
+
+                    {/* Quick "+ Add More" slot while under MAX_IMAGES */}
+                    {!isMaxReached && !isSubmitting && (
+                      <label
+                        htmlFor="media-upload"
+                        className="aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-green-500 hover:bg-green-50/40 flex flex-col items-center justify-center cursor-pointer transition-colors text-gray-500 hover:text-green-600"
+                      >
+                        <Plus className="w-6 h-6 mb-1" />
+                        <span className="text-xs font-medium">Add More</span>
+                        <span className="text-[11px] text-gray-400">
+                          ({MAX_IMAGES - formData.media.length} left)
+                        </span>
+                      </label>
+                    )}
                   </div>
                 </div>
               )}
@@ -412,7 +477,7 @@ const handleSubmit = async (e) => {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 transition"
                 disabled={isSubmitting}
               >
-                {mainCategories.map(cat => (
+                {mainCategories.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
                   </option>
@@ -435,7 +500,7 @@ const handleSubmit = async (e) => {
                   disabled={isSubmitting}
                 >
                   <option value="">Select subcategory</option>
-                  {jewellerySubcategories.map(sub => (
+                  {jewellerySubcategories.map((sub) => (
                     <option key={sub.value} value={sub.value}>
                       {sub.label}
                     </option>
@@ -457,11 +522,15 @@ const handleSubmit = async (e) => {
                 onChange={handleChange}
                 required={formData.category === 'fashion'}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 transition"
-                placeholder={formData.category === 'fashion' ? "Enter product name" : "Enter name (optional)"}
+                placeholder={
+                  formData.category === 'fashion' ? 'Enter product name' : 'Enter name (optional)'
+                }
                 disabled={isSubmitting}
               />
               {formData.category !== 'fashion' && (
-                <p className="text-xs text-gray-500 mt-1">Name is optional. Leave empty for unnamed products.</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Name is optional. Leave empty for unnamed products.
+                </p>
               )}
             </div>
 
@@ -490,7 +559,7 @@ const handleSubmit = async (e) => {
                 Stock Status <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {stockOptions.map(option => (
+                {stockOptions.map((option) => (
                   <label
                     key={option.value}
                     className={`flex items-center justify-center p-3 border-2 rounded-lg cursor-pointer transition ${
@@ -529,9 +598,9 @@ const handleSubmit = async (e) => {
                   value={formData.whatsappNumber.replace('+91', '')}
                   onChange={(e) => {
                     const value = e.target.value;
-                    setFormData(prev => ({
+                    setFormData((prev) => ({
                       ...prev,
-                      whatsappNumber: `+91${value}`
+                      whatsappNumber: `+91${value}`,
                     }));
                   }}
                   required
@@ -545,13 +614,13 @@ const handleSubmit = async (e) => {
             {/* Description */}
             <div className="mb-6">
               <label className="block text-gray-700 mb-2 font-semibold">
-                Description <span className="text-red-500">*</span>
+                Description 
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                required
+               
                 rows="5"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 transition resize-y"
                 placeholder="Enter product description..."
@@ -577,7 +646,7 @@ const handleSubmit = async (e) => {
                   'Add Product'
                 )}
               </motion.button>
-              
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}

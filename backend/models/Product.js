@@ -36,6 +36,13 @@ const productSchema = new mongoose.Schema({
       return this.category === 'jewellery';
     }
   },
+
+  order: {
+  type: Number,
+  default: 0,
+  index: true,
+},
+
   price: {
     type: Number,
     required: true,
